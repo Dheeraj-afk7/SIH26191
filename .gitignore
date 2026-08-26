@@ -34,11 +34,16 @@ yarn-debug.log*
 yarn-error.log*
 
 # ─── GIS / Large Data ────────────────────────────────────────────────────────
-# Raw rasters and shapefiles can be large — exclude binary blobs from version control.
-# (Check in metadata/README files only, not the actual datasets.)
-data/raw/
-data/processed/
-data/outputs/
+# Ignore all content inside data/ subdirectories (large binary datasets),
+# but keep README.md files so directory intent is documented in Git.
+# NOTE: Must ignore contents (data/raw/**) not the directory itself (data/raw/)
+# so that the README.md exemption below can work correctly.
+data/raw/**
+!data/raw/README.md
+data/processed/**
+!data/processed/README.md
+data/outputs/**
+!data/outputs/README.md
 *.tif
 *.tiff
 *.geotiff
