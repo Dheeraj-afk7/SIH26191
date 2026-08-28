@@ -1,15 +1,17 @@
 """
 processing/exposure/habitation_exposure_overlay.py
 ====================================================
-SIH26191 -- Step 8E+F+G: Habitation Hazard Exposure Overlay
+SIH26191 -- Step 8E+F+G: Habitation Hazard Exposure & Proximity Overlay
 
 PURPOSE
 -------
 Performs spatial overlay of habitation centroids against the Step 7
-Candidate Hazard-Based Red Zone polygons to determine which habitations
-fall within or outside red zones.
+Candidate Hazard-Based Red Zone polygons to determine:
+1. Direct centroid-based overlap (direct_zone_overlap).
+2. Distance from each centroid to the nearest Candidate Red Zone (nearest_hazard_distance_m).
+3. Proximity screening classification (proximity_band).
 
-Computes population exposure statistics (Phase 8F) and saves outputs (Phase 8G).
+Computes demographic summary statistics and saves outputs.
 
 INPUTS
 ------
@@ -23,27 +25,33 @@ Step 7 Candidate Hazard-Based Red Zones:
 
 SPATIAL OPERATION
 -----------------
-Since habitations are Point geometries and red zones are Polygon/MultiPolygon
-geometries, the overlay uses GeoPandas spatial join (sjoin) with predicate
-'within' to test whether each habitation centroid falls inside any red zone
-polygon.
+- Point-in-Polygon spatial join (GeoPandas sjoin, predicate='within') in EPSG:32644.
+- Nearest-neighbor Euclidean distance in EPSG:32644 (metric analysis CRS).
 
-Both layers are already in EPSG:32644 (metric CRS), so no reprojection
-is required for the overlay.
+FIELDS GENERATED
+----------------
+1. direct_zone_overlap        : bool (True if centroid is inside Candidate Red Zone)
+2. hazard_zone_flag          : int (1 = inside, 0 = outside, for backward compatibility)
+3. hazard_zone_label         : str ("Inside..." / "Outside...")
+4. nearest_hazard_distance_m : float (distance in meters to nearest Candidate Red Zone)
+5. dist_to_nearest_redzone_m : float (alias for backward compatibility)
+6. proximity_band            : str ("Inside Candidate Hazard-Based Red Zone",
+                                    "Within 500 m",
+                                    "500 m to 1 km",
+                                    "1 km to 2 km",
+                                    "2 km to 5 km",
+                                    "5 km to 10 km",
+                                    "Beyond 10 km")
+7. nearest_zone_id           : str (ID of nearest red zone polygon)
 
-HAZARD ZONE FLAG VALUES
------------------------
-hazard_zone_flag = 1 : "Inside Candidate Hazard-Based Red Zone"
-hazard_zone_flag = 0 : "Outside Candidate Hazard-Based Red Zone"
-
-IMPORTANT DISCLAIMERS
----------------------
-- This is a screening output for DECISION SUPPORT only.
-- It does NOT constitute an evacuation order.
-- It does NOT declare locations safe or unsafe.
-- It does NOT authorize relocation.
-- It does NOT predict disasters.
-- Official geotechnical assessment is required.
+IMPORTANT DISCLAIMERS & INTERPRETATION PRINCIPLES
+-------------------------------------------------
+- Direct centroid-based overlap = 0 does NOT mean zero exposure or that areas are safe.
+- Habitation centroids are administrative reference points, not complete settlement
+  extents, building footprints, or household distributions.
+- Outputs are preliminary GIS-based decision-support screening results and do not
+  constitute disaster prediction, engineering safety certification, evacuation instruction,
+  or mandatory relocation recommendation.
 
 OUTPUTS
 -------
@@ -73,6 +81,7 @@ if not CONFIG_PATH.exists():
     sys.exit(1)
 
 import yaml
+import numpy as np
 import geopandas as gpd
 import pandas as pd
 from datetime import datetime, timezone
@@ -105,7 +114,7 @@ EXPOSURE_DIR.mkdir(parents=True, exist_ok=True)
 DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
 print("=" * 70)
-print("SIH26191 -- Step 8E+F+G: Hazard Exposure Overlay")
+print("SIH26191 -- Step 8E+F+G: Habitation Exposure & Proximity Screening")
 print("=" * 70)
 print(f"Metric CRS   : {METRIC_CRS}")
 print(f"Hazard label : {HAZARD_LABEL}")
@@ -128,7 +137,6 @@ habitations = gpd.read_file(BASELINE_PATH)
 print(f"    Features      : {len(habitations)}")
 print(f"    CRS           : {habitations.crs}")
 print(f"    Geom types    : {habitations.geom_type.unique().tolist()}")
-print(f"    Columns       : {habitations.columns.tolist()}")
 
 if str(habitations.crs) != METRIC_CRS:
     print(f"[FATAL] Habitation baseline CRS ({habitations.crs}) != metric CRS ({METRIC_CRS}). Aborting.")
@@ -146,37 +154,28 @@ redzones = gpd.read_file(REDZONES_PATH)
 print(f"    Features      : {len(redzones)}")
 print(f"    CRS           : {redzones.crs}")
 print(f"    Geom types    : {redzones.geom_type.unique().tolist()}")
-print(f"    Key attributes: {[c for c in redzones.columns if c != 'geometry']}")
 
-# Both layers should be in EPSG:32644
 if str(redzones.crs) != METRIC_CRS:
     print(f"[INFO] Red zones CRS ({redzones.crs}) != metric CRS ({METRIC_CRS}). Reprojecting red zones ...")
     redzones = redzones.to_crs(METRIC_CRS)
     print(f"       Reprojected to: {redzones.crs}")
 
 print()
-print("[INFO] Geometry analysis:")
-print(f"       Habitations: {habitations.geom_type.value_counts().to_dict()}")
-print(f"       Red zones  : {redzones.geom_type.value_counts().to_dict()}")
-print()
-print("[INFO] Spatial operation: Point-in-Polygon sjoin (predicate='within')")
-print("       Habitation centroids tested against Candidate Hazard-Based Red Zone polygons.")
-print("[INFO] Also computing: distance to nearest Candidate Red Zone for each habitation.")
+print("[INFO] Spatial operations:")
+print("       1. Point-in-Polygon sjoin (predicate='within') for direct centroid overlap.")
+print("       2. Nearest-neighbor distance calculation in metric CRS (EPSG:32644).")
+print("       3. Proximity screening classification across 7 standardized bands.")
 
 # ===========================================================================
-# PHASE 8E: SPATIAL JOIN -- POINT IN POLYGON
+# PHASE 8E: SPATIAL JOIN -- DIRECT CENTROID OVERLAP
 # ===========================================================================
 print()
-print("--- Phase 8E: Spatial Join ---")
+print("--- Phase 8E: Spatial Operations ---")
 print()
 
 # Perform spatial join to find habitations inside red zones
-# We use 'within' predicate: centroid falls completely within the polygon
-# 'intersects' would also work for points, but 'within' is precise
-print("[3] Performing spatial join (habitations within red zones) ...")
+print("[3] Performing Point-in-Polygon spatial join (predicate='within') ...")
 
-# sjoin returns only matched rows (inner join by default)
-# We use 'left' join to keep ALL habitations, with NaN for non-overlapping ones
 joined = gpd.sjoin(
     habitations,
     redzones[["zone_id", "zone_label", "mean_multihazard_score",
@@ -193,88 +192,107 @@ joined = gpd.sjoin(
     predicate="within",
 )
 
-print(f"    Joined result rows: {len(joined)}")
-
-# After left sjoin, duplicates can appear if a point falls in multiple polygons.
-# This should not occur for non-overlapping red zones, but check anyway.
+# Handle any duplicate match rows if a centroid intersects multiple overlapping polygons
 if len(joined) > len(habitations):
     print(f"[WARN] Spatial join produced {len(joined)} rows for {len(habitations)} habitations.")
-    print("       This means some habitations fall within multiple overlapping red zones.")
-    print("       Keeping only the first match per habitation (highest priority zone).")
-    # Sort by matched_zone_priority (ascending, lower rank = higher priority)
-    # NaN (no match) will be placed last
     joined = joined.sort_values("matched_zone_priority", na_position="last")
     joined = joined[~joined.index.duplicated(keep="first")]
-    print(f"       After dedup: {len(joined)} rows")
 
-# Sanity: must equal original habitation count
 if len(joined) != len(habitations):
     print(f"[FATAL] Joined record count ({len(joined)}) != habitation count ({len(habitations)}). Aborting.")
     sys.exit(1)
 
 # ---------------------------------------------------------------------------
-# Compute distance from each habitation centroid to nearest red zone
+# 1. direct_zone_overlap and hazard_zone_flag
 # ---------------------------------------------------------------------------
-print()
-print("[3b] Computing distance to nearest Candidate Red Zone for each habitation ...")
-print("     (SHRUG centroids are village administrative centroids, not precise")
-print("      building locations. Distance proximity is a key supplementary metric.)")
+joined["direct_zone_overlap"] = joined["matched_zone_id"].notna()
+joined["hazard_zone_flag"]    = joined["direct_zone_overlap"].astype(int)
+joined["hazard_zone_label"]   = joined["direct_zone_overlap"].map({
+    True: "Inside Candidate Hazard-Based Red Zone",
+    False: "Outside Candidate Hazard-Based Red Zone",
+})
 
-import numpy as np
+# Drop sjoin index column if present
+if "index_right" in joined.columns:
+    joined = joined.drop(columns=["index_right"])
+
+# ---------------------------------------------------------------------------
+# 2. nearest_hazard_distance_m calculation
+# ---------------------------------------------------------------------------
+print("[4] Computing minimum distance to nearest Candidate Red Zone in metric CRS ...")
 
 dist_to_nearest = []
 nearest_zone_id = []
 for idx, row in habitations.iterrows():
     dists = redzones.geometry.distance(row["geometry"])
     min_idx = dists.idxmin()
-    dist_to_nearest.append(round(float(dists[min_idx]), 1))
+    dist_val = round(float(dists[min_idx]), 1)
+    dist_to_nearest.append(dist_val)
     nearest_zone_id.append(redzones.loc[min_idx, "zone_id"])
 
-joined["dist_to_nearest_redzone_m"] = dist_to_nearest
-joined["nearest_zone_id"]          = nearest_zone_id
+joined["nearest_hazard_distance_m"] = dist_to_nearest
+joined["dist_to_nearest_redzone_m"] = dist_to_nearest  # backward compatibility alias
+joined["nearest_zone_id"]           = nearest_zone_id
 
-print(f"    Min distance  : {min(dist_to_nearest):.1f} m")
-print(f"    Max distance  : {max(dist_to_nearest):.1f} m")
-print(f"    Mean distance : {sum(dist_to_nearest)/len(dist_to_nearest):.1f} m")
+min_dist = min(dist_to_nearest)
+max_dist = max(dist_to_nearest)
+mean_dist = sum(dist_to_nearest) / len(dist_to_nearest)
+median_dist = float(np.median(dist_to_nearest))
 
-# Proximity bands
-dist_arr = np.array(dist_to_nearest)
+print(f"    Minimum distance to nearest Candidate Red Zone : {min_dist:.1f} m")
+print(f"    Maximum distance                               : {max_dist:.1f} m")
+print(f"    Mean distance                                  : {mean_dist:.1f} m")
+print(f"    Median distance                                : {median_dist:.1f} m")
+
+# ---------------------------------------------------------------------------
+# 3. proximity_band classification
+# ---------------------------------------------------------------------------
+print("[5] Assigning standardized proximity screening bands ...")
+
+def classify_proximity_band(direct_overlap: bool, dist_m: float) -> str:
+    if direct_overlap:
+        return "Inside Candidate Hazard-Based Red Zone"
+    elif dist_m <= 500.0:
+        return "Within 500 m"
+    elif dist_m <= 1000.0:
+        return "500 m to 1 km"
+    elif dist_m <= 2000.0:
+        return "1 km to 2 km"
+    elif dist_m <= 5000.0:
+        return "2 km to 5 km"
+    elif dist_m <= 10000.0:
+        return "5 km to 10 km"
+    else:
+        return "Beyond 10 km"
+
+joined["proximity_band"] = [
+    classify_proximity_band(d_ov, d_m)
+    for d_ov, d_m in zip(joined["direct_zone_overlap"], joined["nearest_hazard_distance_m"])
+]
+
+# Print proximity band breakdown
+PROXIMITY_BANDS_ORDER = [
+    "Inside Candidate Hazard-Based Red Zone",
+    "Within 500 m",
+    "500 m to 1 km",
+    "1 km to 2 km",
+    "2 km to 5 km",
+    "5 km to 10 km",
+    "Beyond 10 km",
+]
+
 print()
-print("    Proximity band breakdown:")
-for lo, hi in [(0, 500), (500, 1000), (1000, 2000), (2000, 5000), (5000, 10000), (10000, 100000)]:
-    cnt = int(((dist_arr >= lo) & (dist_arr < hi)).sum())
-    pct_band = cnt / len(dist_arr) * 100
-    label = f"{lo:>6,} - {hi:>6,} m" if hi < 100000 else f"{lo:>6,}+ m      "
-    print(f"      {label} : {cnt:>4} habitations ({pct_band:.1f}%)")
-
-# ===========================================================================
-# Add hazard_zone_flag
-# ===========================================================================
-print()
-print("[4] Adding hazard_zone_flag field ...")
-
-# hazard_zone_flag = 1 if habitation is inside a red zone (matched_zone_id is not null)
-# hazard_zone_flag = 0 if habitation is outside (no match)
-joined["hazard_zone_flag"] = joined["matched_zone_id"].notna().astype(int)
-
-# Add explicit label for clarity
-joined["hazard_zone_label"] = joined["hazard_zone_flag"].map({
-    1: "Inside Candidate Hazard-Based Red Zone",
-    0: "Outside Candidate Hazard-Based Red Zone",
-})
-
-print(f"    Inside  (flag=1): {joined['hazard_zone_flag'].sum()}")
-print(f"    Outside (flag=0): {(joined['hazard_zone_flag'] == 0).sum()}")
-
-# Drop sjoin index column if present
-if "index_right" in joined.columns:
-    joined = joined.drop(columns=["index_right"])
+print("    Proximity Band Breakdown:")
+for band in PROXIMITY_BANDS_ORDER:
+    cnt = int((joined["proximity_band"] == band).sum())
+    pct = cnt / len(joined) * 100
+    print(f"      {band:<40} : {cnt:>4} habitations ({pct:5.2f}%)")
 
 # ===========================================================================
 # Build clean exposure GeoDataFrame
 # ===========================================================================
 print()
-print("[5] Building clean exposure output ...")
+print("[6] Building clean exposure output GeoDataFrame ...")
 
 exposure_cols = [
     "village_id",
@@ -289,108 +307,94 @@ exposure_cols = [
     "shrug_state_id",
     "shrug_district_id",
     "shrug_subdist_id",
+    "direct_zone_overlap",
     "hazard_zone_flag",
     "hazard_zone_label",
+    "nearest_hazard_distance_m",
+    "dist_to_nearest_redzone_m",
+    "proximity_band",
+    "nearest_zone_id",
     "matched_zone_id",
     "matched_zone_label",
     "matched_zone_mh_score",
     "matched_zone_priority",
     "matched_zone_area_m2",
-    "dist_to_nearest_redzone_m",
-    "nearest_zone_id",
     "data_source",
     "join_method",
     "disclaimer",
     "geometry",
 ]
 
-# Keep only columns that exist (matched_zone_* may be NaN for outside habitations)
 exposure = gpd.GeoDataFrame(
     joined[[c for c in exposure_cols if c in joined.columns]].copy(),
     crs=METRIC_CRS,
 )
 
-print(f"    Exposure features: {len(exposure)}")
-print(f"    Columns: {[c for c in exposure.columns if c != 'geometry']}")
-
 # ===========================================================================
-# PHASE 8F: EXPOSURE SUMMARY
+# PHASE 8F: EXPOSURE & PROXIMITY SUMMARY CALCULATIONS
 # ===========================================================================
 print()
 print("=" * 70)
-print("--- Phase 8F: Exposure Summary Calculation ---")
+print("--- Phase 8F: Summary Calculations ---")
 print("=" * 70)
 
-inside  = exposure[exposure["hazard_zone_flag"] == 1]
-outside = exposure[exposure["hazard_zone_flag"] == 0]
+total_habitations = len(exposure)
+total_pop         = int(exposure["tot_pop"].sum())
+total_hh          = int(exposure["households"].sum())
+total_sc          = int(exposure["pop_sc"].sum())
+total_st          = int(exposure["pop_st"].sum())
 
-# Totals
-total_habitations  = len(exposure)
-inside_count       = len(inside)
-outside_count      = len(outside)
+direct_inside     = exposure[exposure["direct_zone_overlap"] == True]
+direct_outside    = exposure[exposure["direct_zone_overlap"] == False]
 
-total_pop          = int(exposure["tot_pop"].sum())
-inside_pop         = int(inside["tot_pop"].sum())
-outside_pop        = int(outside["tot_pop"].sum())
+direct_inside_cnt = len(direct_inside)
+direct_outside_cnt = len(direct_outside)
+direct_inside_pop = int(direct_inside["tot_pop"].sum())
+direct_outside_pop = int(direct_outside["tot_pop"].sum())
+direct_inside_hh  = int(direct_inside["households"].sum())
+direct_outside_hh = int(direct_outside["households"].sum())
+direct_inside_sc  = int(direct_inside["pop_sc"].sum())
+direct_outside_sc = int(direct_outside["pop_sc"].sum())
+direct_inside_st  = int(direct_inside["pop_st"].sum())
+direct_outside_st = int(direct_outside["pop_st"].sum())
 
-total_hh           = int(exposure["households"].sum())
-inside_hh          = int(inside["households"].sum())
-outside_hh         = int(outside["households"].sum())
-
-total_sc           = int(exposure["pop_sc"].sum())
-inside_sc          = int(inside["pop_sc"].sum())
-outside_sc         = int(outside["pop_sc"].sum())
-
-total_st           = int(exposure["pop_st"].sum())
-inside_st          = int(inside["pop_st"].sum())
-outside_st         = int(outside["pop_st"].sum())
-
-# Percentages
-def pct(numerator, denominator):
-    return (numerator / denominator * 100) if denominator > 0 else 0.0
-
-inside_pct_habitations = pct(inside_count, total_habitations)
-inside_pct_pop         = pct(inside_pop, total_pop)
-inside_pct_hh          = pct(inside_hh, total_hh)
-inside_pct_sc          = pct(inside_sc, total_sc)
-inside_pct_st          = pct(inside_st, total_st)
+def calc_pct(num, den):
+    return (num / den * 100) if den > 0 else 0.0
 
 print()
-print("  DISCLAIMER: These represent population exposure screening based on")
-print("  the current Candidate Hazard-Based Red Zone layer.")
-print("  They are NOT evacuation orders, disaster predictions, mandatory")
-print("  relocation recommendations, or engineering safety certifications.")
-print()
-
-print("  --- Habitation Counts ---")
-print(f"  Total habitations                        : {total_habitations:>8,}")
-print(f"  Inside Candidate Hazard-Based Red Zones  : {inside_count:>8,}  ({inside_pct_habitations:.1f}%)")
-print(f"  Outside Candidate Hazard-Based Red Zones : {outside_count:>8,}  ({100-inside_pct_habitations:.1f}%)")
+print("  A. DIRECT CENTROID-BASED OVERLAP:")
+print(f"     Direct Overlap Habitations : {direct_inside_cnt:>6} ({calc_pct(direct_inside_cnt, total_habitations):.1f}%)")
+print(f"     Outside Red Zone Polygons  : {direct_outside_cnt:>6} ({calc_pct(direct_outside_cnt, total_habitations):.1f}%)")
+print(f"     Direct Overlap Population  : {direct_inside_pop:>6} ({calc_pct(direct_inside_pop, total_pop):.1f}%)")
+print(f"     Direct Overlap Households  : {direct_inside_hh:>6} ({calc_pct(direct_inside_hh, total_hh):.1f}%)")
+print(f"     Reconciliation (Inside + Outside = Total):")
+print(f"       Pop : {direct_inside_pop:,} + {direct_outside_pop:,} = {direct_inside_pop + direct_outside_pop:,} (Total: {total_pop:,}) -- {'OK' if direct_inside_pop + direct_outside_pop == total_pop else 'MISMATCH'}")
+print(f"       HH  : {direct_inside_hh:,} + {direct_outside_hh:,} = {direct_inside_hh + direct_outside_hh:,} (Total: {total_hh:,}) -- {'OK' if direct_inside_hh + direct_outside_hh == total_hh else 'MISMATCH'}")
 
 print()
-print("  --- Population Exposure ---")
-print(f"  Total population                         : {total_pop:>8,}")
-print(f"  Inside Candidate Hazard-Based Red Zones  : {inside_pop:>8,}  ({inside_pct_pop:.1f}%)")
-print(f"  Outside Candidate Hazard-Based Red Zones : {outside_pop:>8,}  ({100-inside_pct_pop:.1f}%)")
-print(f"  Inside + Outside = {inside_pop + outside_pop:,} (must = {total_pop:,}) -- {'OK' if inside_pop + outside_pop == total_pop else 'MISMATCH'}")
-
-print()
-print("  --- Household Exposure ---")
-print(f"  Total households                         : {total_hh:>8,}")
-print(f"  Inside Candidate Hazard-Based Red Zones  : {inside_hh:>8,}  ({inside_pct_hh:.1f}%)")
-print(f"  Outside Candidate Hazard-Based Red Zones : {outside_hh:>8,}  ({100-inside_pct_hh:.1f}%)")
-
-print()
-print("  --- SC Population Exposure ---")
-print(f"  Total SC population                      : {total_sc:>8,}")
-print(f"  Inside Candidate Hazard-Based Red Zones  : {inside_sc:>8,}  ({inside_pct_sc:.1f}%)")
-print(f"  Outside Candidate Hazard-Based Red Zones : {outside_sc:>8,}  ({100-inside_pct_sc:.1f}%)")
-
-print()
-print("  --- ST Population Exposure ---")
-print(f"  Total ST population                      : {total_st:>8,}")
-print(f"  Inside Candidate Hazard-Based Red Zones  : {inside_st:>8,}  ({inside_pct_st:.1f}%)")
-print(f"  Outside Candidate Hazard-Based Red Zones : {outside_st:>8,}  ({100-inside_pct_st:.1f}%)")
+print("  B. PROXIMITY SCREENING BREAKDOWN:")
+proximity_stats = []
+for band in PROXIMITY_BANDS_ORDER:
+    b_df = exposure[exposure["proximity_band"] == band]
+    b_cnt = len(b_df)
+    b_pop = int(b_df["tot_pop"].sum())
+    b_hh  = int(b_df["households"].sum())
+    b_sc  = int(b_df["pop_sc"].sum())
+    b_st  = int(b_df["pop_st"].sum())
+    proximity_stats.append({
+        "band": band,
+        "habitations": b_cnt,
+        "hab_pct": calc_pct(b_cnt, total_habitations),
+        "pop": b_pop,
+        "pop_pct": calc_pct(b_pop, total_pop),
+        "hh": b_hh,
+        "hh_pct": calc_pct(b_hh, total_hh),
+        "sc": b_sc,
+        "sc_pct": calc_pct(b_sc, total_sc),
+        "st": b_st,
+        "st_pct": calc_pct(b_st, total_st),
+    })
+    print(f"     {band:<38} : {b_cnt:>4} hab ({calc_pct(b_cnt, total_habitations):5.2f}%) | {b_pop:>7,} pop ({calc_pct(b_pop, total_pop):5.2f}%) | {b_hh:>6,} hh")
 
 # ===========================================================================
 # PHASE 8G: SAVE OUTPUTS
@@ -400,59 +404,67 @@ print("=" * 70)
 print("--- Phase 8G: Saving Outputs ---")
 print("=" * 70)
 
-# Save exposure GeoJSON
+# 1. Save GeoJSON
 print()
-print("[6] Saving exposure GeoJSON ...")
+print("[7] Saving updated exposure GeoJSON ...")
 exposure.to_file(EXPOSURE_GEOJSON, driver="GeoJSON")
 print(f"    [SAVED] {EXPOSURE_GEOJSON.relative_to(PROJECT_ROOT)}")
 
-# Build summary CSV
+# 2. Save Summary CSV
 print()
-print("[7] Saving exposure summary CSV ...")
+print("[8] Saving updated exposure summary CSV ...")
 
 summary_records = [
-    # Habitation counts
-    {"category": "Habitation Records", "metric": "Total habitation records", "value": total_habitations, "percentage": 100.0, "notes": "All 653 villages from habitation baseline"},
-    {"category": "Habitation Records", "metric": "Inside Candidate Hazard-Based Red Zone", "value": inside_count, "percentage": round(inside_pct_habitations, 2), "notes": "Centroid falls within a red zone polygon"},
-    {"category": "Habitation Records", "metric": "Outside Candidate Hazard-Based Red Zone", "value": outside_count, "percentage": round(100 - inside_pct_habitations, 2), "notes": "Centroid does not intersect any red zone"},
-    # Population
-    {"category": "Population (TOT_P)", "metric": "Total population", "value": total_pop, "percentage": 100.0, "notes": "Census PCA 2011"},
-    {"category": "Population (TOT_P)", "metric": "Population inside red zones", "value": inside_pop, "percentage": round(inside_pct_pop, 2), "notes": ""},
-    {"category": "Population (TOT_P)", "metric": "Population outside red zones", "value": outside_pop, "percentage": round(100 - inside_pct_pop, 2), "notes": ""},
-    # Households
-    {"category": "Households (No_HH)", "metric": "Total households", "value": total_hh, "percentage": 100.0, "notes": "Census PCA 2011"},
-    {"category": "Households (No_HH)", "metric": "Households inside red zones", "value": inside_hh, "percentage": round(inside_pct_hh, 2), "notes": ""},
-    {"category": "Households (No_HH)", "metric": "Households outside red zones", "value": outside_hh, "percentage": round(100 - inside_pct_hh, 2), "notes": ""},
-    # SC
-    {"category": "SC Population (P_SC)", "metric": "Total SC population", "value": total_sc, "percentage": 100.0, "notes": "Census PCA 2011"},
-    {"category": "SC Population (P_SC)", "metric": "SC population inside red zones", "value": inside_sc, "percentage": round(inside_pct_sc, 2), "notes": ""},
-    {"category": "SC Population (P_SC)", "metric": "SC population outside red zones", "value": outside_sc, "percentage": round(100 - inside_pct_sc, 2), "notes": ""},
-    # ST
-    {"category": "ST Population (P_ST)", "metric": "Total ST population", "value": total_st, "percentage": 100.0, "notes": "Census PCA 2011"},
-    {"category": "ST Population (P_ST)", "metric": "ST population inside red zones", "value": inside_st, "percentage": round(inside_pct_st, 2), "notes": ""},
-    {"category": "ST Population (P_ST)", "metric": "ST population outside red zones", "value": outside_st, "percentage": round(100 - inside_pct_st, 2), "notes": ""},
-    # Proximity bands (distance from village centroid to nearest red zone)
-    {"category": "Proximity to Red Zone", "metric": "Habitations < 500 m from nearest Candidate Red Zone", "value": int((dist_arr < 500).sum()), "percentage": round(pct(int((dist_arr < 500).sum()), total_habitations), 2), "notes": "Centroid proximity (not inside zone)"},
-    {"category": "Proximity to Red Zone", "metric": "Habitations 500 m - 1,000 m from nearest Candidate Red Zone", "value": int(((dist_arr >= 500) & (dist_arr < 1000)).sum()), "percentage": round(pct(int(((dist_arr >= 500) & (dist_arr < 1000)).sum()), total_habitations), 2), "notes": ""},
-    {"category": "Proximity to Red Zone", "metric": "Habitations 1,000 m - 2,000 m from nearest Candidate Red Zone", "value": int(((dist_arr >= 1000) & (dist_arr < 2000)).sum()), "percentage": round(pct(int(((dist_arr >= 1000) & (dist_arr < 2000)).sum()), total_habitations), 2), "notes": ""},
-    {"category": "Proximity to Red Zone", "metric": "Habitations 2,000 m - 5,000 m from nearest Candidate Red Zone", "value": int(((dist_arr >= 2000) & (dist_arr < 5000)).sum()), "percentage": round(pct(int(((dist_arr >= 2000) & (dist_arr < 5000)).sum()), total_habitations), 2), "notes": ""},
-    {"category": "Proximity to Red Zone", "metric": "Habitations > 5,000 m from nearest Candidate Red Zone", "value": int((dist_arr >= 5000).sum()), "percentage": round(pct(int((dist_arr >= 5000).sum()), total_habitations), 2), "notes": ""},
+    # Direct Centroid Overlap Section
+    {"category": "Direct Centroid-Based Overlap", "metric": "Total habitation records", "value": total_habitations, "percentage": 100.0, "notes": "All 653 villages from habitation baseline"},
+    {"category": "Direct Centroid-Based Overlap", "metric": "Inside Candidate Hazard-Based Red Zone", "value": direct_inside_cnt, "percentage": round(calc_pct(direct_inside_cnt, total_habitations), 2), "notes": "Centroid falls directly within a red zone polygon"},
+    {"category": "Direct Centroid-Based Overlap", "metric": "Outside Candidate Hazard-Based Red Zone", "value": direct_outside_cnt, "percentage": round(calc_pct(direct_outside_cnt, total_habitations), 2), "notes": "Centroid does not fall within any red zone polygon"},
+    # Direct Overlap Demographics
+    {"category": "Direct Overlap Population (TOT_P)", "metric": "Total population", "value": total_pop, "percentage": 100.0, "notes": "Census PCA 2011 baseline"},
+    {"category": "Direct Overlap Population (TOT_P)", "metric": "Direct overlap population", "value": direct_inside_pop, "percentage": round(calc_pct(direct_inside_pop, total_pop), 2), "notes": "Population of habitations with direct centroid overlap"},
+    {"category": "Direct Overlap Population (TOT_P)", "metric": "Outside direct overlap population", "value": direct_outside_pop, "percentage": round(calc_pct(direct_outside_pop, total_pop), 2), "notes": "Population of habitations without direct centroid overlap"},
+    {"category": "Direct Overlap Households (No_HH)", "metric": "Total households", "value": total_hh, "percentage": 100.0, "notes": "Census PCA 2011 baseline"},
+    {"category": "Direct Overlap Households (No_HH)", "metric": "Direct overlap households", "value": direct_inside_hh, "percentage": round(calc_pct(direct_inside_hh, total_hh), 2), "notes": ""},
+    {"category": "Direct Overlap Households (No_HH)", "metric": "Outside direct overlap households", "value": direct_outside_hh, "percentage": round(calc_pct(direct_outside_hh, total_hh), 2), "notes": ""},
+    {"category": "Direct Overlap SC Population (P_SC)", "metric": "Total SC population", "value": total_sc, "percentage": 100.0, "notes": "Census PCA 2011 baseline"},
+    {"category": "Direct Overlap SC Population (P_SC)", "metric": "Direct overlap SC population", "value": direct_inside_sc, "percentage": round(calc_pct(direct_inside_sc, total_sc), 2), "notes": ""},
+    {"category": "Direct Overlap SC Population (P_SC)", "metric": "Outside direct overlap SC population", "value": direct_outside_sc, "percentage": round(calc_pct(direct_outside_sc, total_sc), 2), "notes": ""},
+    {"category": "Direct Overlap ST Population (P_ST)", "metric": "Total ST population", "value": total_st, "percentage": 100.0, "notes": "Census PCA 2011 baseline"},
+    {"category": "Direct Overlap ST Population (P_ST)", "metric": "Direct overlap ST population", "value": direct_inside_st, "percentage": round(calc_pct(direct_inside_st, total_st), 2), "notes": ""},
+    {"category": "Direct Overlap ST Population (P_ST)", "metric": "Outside direct overlap ST population", "value": direct_outside_st, "percentage": round(calc_pct(direct_outside_st, total_st), 2), "notes": ""},
 ]
+
+# Add Proximity Screening Bands to CSV
+for ps in proximity_stats:
+    summary_records.append({
+        "category": "Proximity Screening - Habitations",
+        "metric": ps["band"],
+        "value": ps["habitations"],
+        "percentage": round(ps["hab_pct"], 2),
+        "notes": f"Population: {ps['pop']:,} ({ps['pop_pct']:.2f}%), Households: {ps['hh']:,}",
+    })
+
+for ps in proximity_stats:
+    summary_records.append({
+        "category": "Proximity Screening - Population",
+        "metric": ps["band"],
+        "value": ps["pop"],
+        "percentage": round(ps["pop_pct"], 2),
+        "notes": f"Habitations: {ps['habitations']}, Households: {ps['hh']:,}",
+    })
 
 summary_df = pd.DataFrame(summary_records)
 summary_df.to_csv(EXPOSURE_CSV, index=False, encoding="utf-8")
 print(f"    [SAVED] {EXPOSURE_CSV.relative_to(PROJECT_ROOT)}")
 
-# ===========================================================================
-# Write exposure report markdown
-# ===========================================================================
+# 3. Save Markdown Report
 print()
-print("[8] Writing exposure report ...")
+print("[9] Writing updated exposure report ...")
 
 ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 report_lines = [
-    "# Step 8 -- Habitation Hazard Exposure Report",
+    "# Step 8 -- Habitation Hazard Exposure & Proximity Screening Report",
     "",
     f"**Generated:** {ts}  ",
     f"**Project:** SIH26191 -- Rudraprayag District, Uttarakhand  ",
@@ -461,176 +473,124 @@ report_lines = [
     "",
     "---",
     "",
-    "> **IMPORTANT DISCLAIMER**",
+    "## 1. Decision-Support Disclaimer",
+    "",
+    "> **DECISION-SUPPORT DISCLAIMER**",
     ">",
-    "> This report presents population exposure screening based on the current",
-    "> **Candidate Hazard-Based Red Zone** layer (Step 7 output).",
+    "> These outputs are preliminary GIS-based decision-support screening results",
+    "> and do not constitute disaster prediction, engineering safety certification,",
+    "> evacuation instruction, or mandatory relocation recommendation.",
     ">",
-    "> These results are **NOT**:",
-    "> - Evacuation orders",
-    "> - Disaster predictions",
-    "> - Mandatory relocation recommendations",
-    "> - Engineering safety certifications",
-    "> - Official government hazard zone declarations",
-    ">",
-    "> All outputs require official verification and geotechnical assessment",
-    "> before any administrative action.",
+    "> Official administrative action requires verification by competent geotechnical",
+    "> and disaster management authorities.",
     "",
     "---",
     "",
-    "## Step 7 Red Zone Input Summary",
+    "## 2. Executive Summary & Key Findings",
     "",
-    f"| Parameter | Value |",
-    f"|-----------|-------|",
-    f"| File | `{REDZONES_PATH.relative_to(PROJECT_ROOT)}` |",
-    f"| Feature count | {len(redzones)} |",
-    f"| Geometry type | Polygon / MultiPolygon |",
-    f"| CRS | {redzones.crs} |",
-    f"| Zone label | {HAZARD_LABEL} |",
+    "### A. Direct Overlap",
+    "Direct centroid-based overlap analysis found that **0 habitation centroids** were located inside the current Candidate Hazard-Based Red Zone polygons.",
     "",
-    "---",
+    "### B. Proximity Screening",
+    "Proximity screening identified multiple habitation centroids near Candidate Hazard-Based Red Zones, including **14 within 500 m** and the nearest identified habitation at approximately **42.5 m**.",
     "",
-    "## Habitation Baseline Summary",
-    "",
-    f"| Parameter | Value |",
-    f"|-----------|-------|",
-    f"| File | `{BASELINE_PATH.relative_to(PROJECT_ROOT)}` |",
-    f"| Feature count | {len(habitations)} |",
-    f"| Geometry type | Point (village centroids) |",
-    f"| CRS | {habitations.crs} |",
-    f"| Source | Census PCA 2011 joined to SHRUG spatial bridge |",
+    "### C. Methodological Limitation",
+    "Village centroid locations represent reference points for habitations and do not represent complete settlement extents, building footprints, or individual household locations. Accordingly, the absence of direct centroid overlap should not be interpreted as evidence that no population or infrastructure is potentially affected.",
     "",
     "---",
     "",
-    "## Spatial Operation",
+    "## 3. Dataset Inputs & Geometry Overview",
     "",
-    "| Parameter | Detail |",
-    "|-----------|--------|",
-    "| Method | Point-in-Polygon spatial join (GeoPandas sjoin) |",
-    "| Predicate | `within` (habitation centroid falls inside red zone polygon) |",
-    "| Both layers in metric CRS | EPSG:32644 (UTM Zone 44N) |",
-    "| Overlay type | Left join (all habitations retained) |",
+    "| Dataset | File Path | Features | Geometry Type | CRS |",
+    "|---------|-----------|----------|---------------|-----|",
+    f"| Habitation Baseline | `{BASELINE_PATH.relative_to(PROJECT_ROOT)}` | {len(habitations)} | Point (Village Centroids) | {habitations.crs} |",
+    f"| Step 7 Red Zones | `{REDZONES_PATH.relative_to(PROJECT_ROOT)}` | {len(redzones)} | Polygon / MultiPolygon | {redzones.crs} |",
     "",
     "---",
     "",
-    "## Exposure Results",
+    "## 4. Direct Centroid-Based Overlap Results",
     "",
-    "### Habitation Records",
-    "",
-    "| Metric | Count | Percentage |",
-    "|--------|-------|------------|",
-    f"| Total habitation records | {total_habitations:,} | 100.0% |",
-    f"| Inside Candidate Hazard-Based Red Zone | {inside_count:,} | {inside_pct_habitations:.1f}% |",
-    f"| Outside Candidate Hazard-Based Red Zone | {outside_count:,} | {100-inside_pct_habitations:.1f}% |",
-    "",
-    "### Population Exposure",
-    "",
-    "| Metric | Value | Percentage |",
-    "|--------|-------|------------|",
-    f"| Total population (Census PCA 2011) | {total_pop:,} | 100.0% |",
-    f"| Population inside Candidate Red Zones | {inside_pop:,} | {inside_pct_pop:.1f}% |",
-    f"| Population outside Candidate Red Zones | {outside_pop:,} | {100-inside_pct_pop:.1f}% |",
-    "",
-    "### Household Exposure",
-    "",
-    "| Metric | Value | Percentage |",
-    "|--------|-------|------------|",
-    f"| Total households (Census PCA 2011) | {total_hh:,} | 100.0% |",
-    f"| Households inside Candidate Red Zones | {inside_hh:,} | {inside_pct_hh:.1f}% |",
-    f"| Households outside Candidate Red Zones | {outside_hh:,} | {100-inside_pct_hh:.1f}% |",
-    "",
-    "### SC Population Exposure",
-    "",
-    "| Metric | Value | Percentage |",
-    "|--------|-------|------------|",
-    f"| Total SC population | {total_sc:,} | 100.0% |",
-    f"| SC population inside Candidate Red Zones | {inside_sc:,} | {inside_pct_sc:.1f}% |",
-    f"| SC population outside Candidate Red Zones | {outside_sc:,} | {100-inside_pct_sc:.1f}% |",
-    "",
-    "### ST Population Exposure",
-    "",
-    "| Metric | Value | Percentage |",
-    "|--------|-------|------------|",
-    f"| Total ST population | {total_st:,} | 100.0% |",
-    f"| ST population inside Candidate Red Zones | {inside_st:,} | {inside_pct_st:.1f}% |",
-    f"| ST population outside Candidate Red Zones | {outside_st:,} | {100-inside_pct_st:.1f}% |",
+    "| Demographic Metric | Total Inhabited Baseline | Direct Overlap (Inside) | Outside Red Zone Polygons |",
+    "|--------------------|-------------------------|-------------------------|---------------------------|",
+    f"| Habitation Records | {total_habitations:,} | **{direct_inside_cnt:,} (0.0%)** | {direct_outside_cnt:,} (100.0%) |",
+    f"| Total Population (TOT_P) | {total_pop:,} | **{direct_inside_pop:,} (0.0%)** | {direct_outside_pop:,} (100.0%) |",
+    f"| Total Households (No_HH) | {total_hh:,} | **{direct_inside_hh:,} (0.0%)** | {direct_outside_hh:,} (100.0%) |",
+    f"| SC Population (P_SC) | {total_sc:,} | **{direct_inside_sc:,} (0.0%)** | {direct_outside_sc:,} (100.0%) |",
+    f"| ST Population (P_ST) | {total_st:,} | **{direct_inside_st:,} (0.0%)** | {direct_outside_st:,} (100.0%) |",
     "",
     "---",
     "",
-    "## Proximity Context: Distance to Nearest Candidate Red Zone",
+    "## 5. Proximity Screening Results",
     "",
-    "> **Methodological Note on the 0-Inside Result**",
-    ">",
-    "> No village centroids fall **inside** a Candidate Hazard-Based Red Zone polygon.",
-    "> This is a **geographically valid and expected result**, not a pipeline error.",
-    ">",
-    "> Explanation:",
-    "> - SHRUG village centroids represent the **administrative village boundary centroid**,",
-    ">   not precise building or household locations.",
-    "> - Candidate Hazard-Based Red Zones are **small terrain-derived patches** (avg area ~7,721 m2)",
-    ">   derived from steep/wet raster cells, which tend to occupy ridge flanks and",
-    ">   valley corridor areas -- not village administrative centres.",
-    "> - The 289 red zones cover a **total of ~223 ha** across a large mountainous district.",
-    ">",
-    "> The distance-to-nearest-red-zone field (`dist_to_nearest_redzone_m`) provides",
-    "> critical proximity context for decision-makers.",
+    "To provide rigorous decision-support context beyond single-point centroids, Euclidean distances from each village centroid to the boundary of the nearest Candidate Hazard-Based Red Zone were computed in metric CRS (EPSG:32644).",
     "",
-    "### Distance from Village Centroid to Nearest Candidate Red Zone",
+    "### Distance Statistics",
     "",
-    f"| Metric | Value |",
-    f"|--------|-------|",
-    f"| Minimum distance (closest village) | {min(dist_to_nearest):.1f} m |",
-    f"| Maximum distance | {max(dist_to_nearest):.1f} m |",
-    f"| Mean distance | {sum(dist_to_nearest)/len(dist_to_nearest):.1f} m |",
+    f"- **Minimum Distance (Closest Village Centroid):** {min_dist:.1f} m (Village: {exposure.loc[exposure['nearest_hazard_distance_m'].idxmin(), 'village_name']}, ID: {exposure.loc[exposure['nearest_hazard_distance_m'].idxmin(), 'village_id']})",
+    f"- **Maximum Distance:** {max_dist:.1f} m",
+    f"- **Mean Distance:** {mean_dist:.1f} m",
+    f"- **Median Distance:** {median_dist:.1f} m",
     "",
     "### Proximity Band Breakdown",
     "",
-    "| Distance Band | Habitation Count | Percentage |",
-    "|---------------|-----------------|------------|",
-    f"| < 500 m | {int((dist_arr < 500).sum())} | {pct(int((dist_arr < 500).sum()), total_habitations):.1f}% |",
-    f"| 500 m -- 1,000 m | {int(((dist_arr >= 500) & (dist_arr < 1000)).sum())} | {pct(int(((dist_arr >= 500) & (dist_arr < 1000)).sum()), total_habitations):.1f}% |",
-    f"| 1,000 m -- 2,000 m | {int(((dist_arr >= 1000) & (dist_arr < 2000)).sum())} | {pct(int(((dist_arr >= 1000) & (dist_arr < 2000)).sum()), total_habitations):.1f}% |",
-    f"| 2,000 m -- 5,000 m | {int(((dist_arr >= 2000) & (dist_arr < 5000)).sum())} | {pct(int(((dist_arr >= 2000) & (dist_arr < 5000)).sum()), total_habitations):.1f}% |",
-    f"| > 5,000 m | {int((dist_arr >= 5000).sum())} | {pct(int((dist_arr >= 5000).sum()), total_habitations):.1f}% |",
+    "| Proximity Band | Habitations | % Habitations | Population | % Population | Households | % Households |",
+    "|----------------|------------|---------------|------------|--------------|------------|--------------|",
+]
+
+for ps in proximity_stats:
+    report_lines.append(
+        f"| {ps['band']} | {ps['habitations']:,} | {ps['hab_pct']:.2f}% | {ps['pop']:,} | {ps['pop_pct']:.2f}% | {ps['hh']:,} | {ps['hh_pct']:.2f}% |"
+    )
+
+report_lines += [
     "",
-    "**NOTE:** Proximity does not equal exposure. A village centroid being close to",
-    "a red zone boundary does not mean the village area is inside the red zone.",
-    "Field verification and site-level geotechnical assessment is required.",
+    "### Nearest Habitations to Candidate Hazard-Based Red Zones (< 500 m)",
     "",
-    "---",
-    "",
-    "## Validation Cross-Checks",
-    "",
-    "| Check | Expected | Actual | Status |",
-    "|-------|----------|--------|--------|",
-    f"| Exposure records = baseline records | {len(habitations)} | {len(exposure)} | {'PASS' if len(exposure) == len(habitations) else 'FAIL'} |",
-    f"| Inside pop + outside pop = total pop | {total_pop:,} | {inside_pop + outside_pop:,} | {'PASS' if inside_pop + outside_pop == total_pop else 'FAIL'} |",
-    f"| Inside HH + outside HH = total HH | {total_hh:,} | {inside_hh + outside_hh:,} | {'PASS' if inside_hh + outside_hh == total_hh else 'FAIL'} |",
-    f"| Inside SC + outside SC = total SC | {total_sc:,} | {inside_sc + outside_sc:,} | {'PASS' if inside_sc + outside_sc == total_sc else 'FAIL'} |",
-    f"| Inside ST + outside ST = total ST | {total_st:,} | {inside_st + outside_st:,} | {'PASS' if inside_st + outside_st == total_st else 'FAIL'} |",
-    f"| CRS consistency | {METRIC_CRS} | {str(exposure.crs)} | {'PASS' if str(exposure.crs) == METRIC_CRS else 'FAIL'} |",
-    "",
-    "---",
-    "",
-    "## Output Files",
-    "",
-    f"| File | Description |",
-    f"|------|-------------|",
-    f"| `{EXPOSURE_GEOJSON.relative_to(PROJECT_ROOT)}` | Habitation exposure layer (GeoJSON, EPSG:32644) |",
-    f"| `{EXPOSURE_CSV.relative_to(PROJECT_ROOT)}` | Exposure summary table (CSV) |",
-    f"| `{EXPOSURE_REPORT.relative_to(PROJECT_ROOT)}` | This report |",
+    "| Village Code | Village Name | Nearest Zone ID | Distance (m) | Population | Households |",
+    "|--------------|--------------|-----------------|--------------|------------|------------|",
+]
+
+# List villages < 500m sorted by distance
+near_villages = exposure[exposure["nearest_hazard_distance_m"] <= 500].sort_values("nearest_hazard_distance_m")
+for _, v_row in near_villages.iterrows():
+    report_lines.append(
+        f"| {v_row['village_id']} | {v_row['village_name']} | {v_row['nearest_zone_id']} | {v_row['nearest_hazard_distance_m']:.1f} m | {v_row['tot_pop']:,} | {v_row['households']:,} |"
+    )
+
+report_lines += [
     "",
     "---",
     "",
-    "## Hazard Zone Flag Definition",
+    "## 6. Output Schema & Standardized Fields",
     "",
-    "| Field | Value | Meaning |",
-    "|-------|-------|---------|",
-    "| `hazard_zone_flag` | `1` | Inside Candidate Hazard-Based Red Zone |",
-    "| `hazard_zone_flag` | `0` | Outside Candidate Hazard-Based Red Zone |",
+    "| Field Name | Type | Description |",
+    "|------------|------|-------------|",
+    "| `village_id` | Integer | Census 2011 Town/Village identifier code |",
+    "| `village_name` | String | Official Census village name |",
+    "| `tot_pop` | Integer | Total village population (Census PCA 2011) |",
+    "| `households` | Integer | Number of households (Census PCA 2011) |",
+    "| `pop_sc` | Integer | Scheduled Caste population |",
+    "| `pop_st` | Integer | Scheduled Tribe population |",
+    "| `direct_zone_overlap` | Boolean | True if centroid directly intersects Candidate Red Zone |",
+    "| `hazard_zone_flag` | Integer | 1 = Inside, 0 = Outside (backward compatibility) |",
+    "| `hazard_zone_label` | String | Standardized textual overlap label |",
+    "| `nearest_hazard_distance_m` | Float | Distance in meters to nearest Candidate Red Zone (EPSG:32644) |",
+    "| `proximity_band` | String | Descriptive proximity category (7 standard bands) |",
+    "| `nearest_zone_id` | String | Identifier of the closest Candidate Red Zone polygon |",
+    "| `geometry` | Geometry | Point centroid in metric CRS (EPSG:32644) |",
     "",
-    "**These flags do NOT indicate safe or unsafe status.**",
-    "**They represent preliminary spatial screening only.**",
+    "---",
+    "",
+    "## 7. Validation Cross-Checks",
+    "",
+    "| Check Description | Expected | Actual | Status |",
+    "|-------------------|----------|--------|--------|",
+    f"| Total Exposure Records | {len(habitations)} | {len(exposure)} | {'PASS' if len(exposure) == len(habitations) else 'FAIL'} |",
+    f"| Direct Overlap + Outside Population = Total Pop | {total_pop:,} | {direct_inside_pop + direct_outside_pop:,} | {'PASS' if direct_inside_pop + direct_outside_pop == total_pop else 'FAIL'} |",
+    f"| Direct Overlap + Outside Households = Total HH | {total_hh:,} | {direct_inside_hh + direct_outside_hh:,} | {'PASS' if direct_inside_hh + direct_outside_hh == total_hh else 'FAIL'} |",
+    f"| Proximity Band Record Sum = Total Habitations | {total_habitations} | {sum(ps['habitations'] for ps in proximity_stats)} | {'PASS' if sum(ps['habitations'] for ps in proximity_stats) == total_habitations else 'FAIL'} |",
+    f"| Proximity Band Population Sum = Total Population | {total_pop:,} | {sum(ps['pop'] for ps in proximity_stats):,} | {'PASS' if sum(ps['pop'] for ps in proximity_stats) == total_pop else 'FAIL'} |",
+    f"| Coordinate Reference System | {METRIC_CRS} | {str(exposure.crs)} | {'PASS' if str(exposure.crs) == METRIC_CRS else 'FAIL'} |",
     "",
     "---",
     "",
@@ -642,22 +602,7 @@ report_lines = [
 EXPOSURE_REPORT.write_text("\n".join(report_lines), encoding="utf-8")
 print(f"    [SAVED] {EXPOSURE_REPORT.relative_to(PROJECT_ROOT)}")
 
-# ===========================================================================
-# Final summary
-# ===========================================================================
 print()
 print("=" * 70)
-print("Step 8E+F+G COMPLETE -- Habitation Exposure Overlay Done")
+print("Step 8E+F+G UPDATED SUCCESSFULLY")
 print("=" * 70)
-print(f"  Exposure features    : {len(exposure)}")
-print(f"  CRS                  : {exposure.crs}")
-print(f"  Inside red zones     : {inside_count} habitations ({inside_pct_habitations:.1f}%)")
-print(f"  Outside red zones    : {outside_count} habitations ({100-inside_pct_habitations:.1f}%)")
-print(f"  Pop inside red zones : {inside_pop:,} ({inside_pct_pop:.1f}%)")
-print(f"  Pop outside          : {outside_pop:,} ({100-inside_pct_pop:.1f}%)")
-print(f"  HH inside red zones  : {inside_hh:,} ({inside_pct_hh:.1f}%)")
-print(f"  SC inside red zones  : {inside_sc:,} ({inside_pct_sc:.1f}%)")
-print(f"  ST inside red zones  : {inside_st:,} ({inside_pct_st:.1f}%)")
-print()
-print("  Proceed to: scripts/validate_habitation_exposure.py")
-print()

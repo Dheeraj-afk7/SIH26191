@@ -1,21 +1,30 @@
 category,metric,value,percentage,notes
-Habitation Records,Total habitation records,653,100.0,All 653 villages from habitation baseline
-Habitation Records,Inside Candidate Hazard-Based Red Zone,0,0.0,Centroid falls within a red zone polygon
-Habitation Records,Outside Candidate Hazard-Based Red Zone,653,100.0,Centroid does not intersect any red zone
-Population (TOT_P),Total population,232360,100.0,Census PCA 2011
-Population (TOT_P),Population inside red zones,0,0.0,
-Population (TOT_P),Population outside red zones,232360,100.0,
-Households (No_HH),Total households,50882,100.0,Census PCA 2011
-Households (No_HH),Households inside red zones,0,0.0,
-Households (No_HH),Households outside red zones,50882,100.0,
-SC Population (P_SC),Total SC population,46279,100.0,Census PCA 2011
-SC Population (P_SC),SC population inside red zones,0,0.0,
-SC Population (P_SC),SC population outside red zones,46279,100.0,
-ST Population (P_ST),Total ST population,309,100.0,Census PCA 2011
-ST Population (P_ST),ST population inside red zones,0,0.0,
-ST Population (P_ST),ST population outside red zones,309,100.0,
-Proximity to Red Zone,Habitations < 500 m from nearest Candidate Red Zone,14,2.14,Centroid proximity (not inside zone)
-Proximity to Red Zone,"Habitations 500 m - 1,000 m from nearest Candidate Red Zone",16,2.45,
-Proximity to Red Zone,"Habitations 1,000 m - 2,000 m from nearest Candidate Red Zone",51,7.81,
-Proximity to Red Zone,"Habitations 2,000 m - 5,000 m from nearest Candidate Red Zone",204,31.24,
-Proximity to Red Zone,"Habitations > 5,000 m from nearest Candidate Red Zone",368,56.36,
+Direct Centroid-Based Overlap,Total habitation records,653,100.0,All 653 villages from habitation baseline
+Direct Centroid-Based Overlap,Inside Candidate Hazard-Based Red Zone,0,0.0,Centroid falls directly within a red zone polygon
+Direct Centroid-Based Overlap,Outside Candidate Hazard-Based Red Zone,653,100.0,Centroid does not fall within any red zone polygon
+Direct Overlap Population (TOT_P),Total population,232360,100.0,Census PCA 2011 baseline
+Direct Overlap Population (TOT_P),Direct overlap population,0,0.0,Population of habitations with direct centroid overlap
+Direct Overlap Population (TOT_P),Outside direct overlap population,232360,100.0,Population of habitations without direct centroid overlap
+Direct Overlap Households (No_HH),Total households,50882,100.0,Census PCA 2011 baseline
+Direct Overlap Households (No_HH),Direct overlap households,0,0.0,
+Direct Overlap Households (No_HH),Outside direct overlap households,50882,100.0,
+Direct Overlap SC Population (P_SC),Total SC population,46279,100.0,Census PCA 2011 baseline
+Direct Overlap SC Population (P_SC),Direct overlap SC population,0,0.0,
+Direct Overlap SC Population (P_SC),Outside direct overlap SC population,46279,100.0,
+Direct Overlap ST Population (P_ST),Total ST population,309,100.0,Census PCA 2011 baseline
+Direct Overlap ST Population (P_ST),Direct overlap ST population,0,0.0,
+Direct Overlap ST Population (P_ST),Outside direct overlap ST population,309,100.0,
+Proximity Screening - Habitations,Inside Candidate Hazard-Based Red Zone,0,0.0,"Population: 0 (0.00%), Households: 0"
+Proximity Screening - Habitations,Within 500 m,14,2.14,"Population: 5,305 (2.28%), Households: 1,088"
+Proximity Screening - Habitations,500 m to 1 km,16,2.45,"Population: 4,858 (2.09%), Households: 985"
+Proximity Screening - Habitations,1 km to 2 km,51,7.81,"Population: 17,599 (7.57%), Households: 3,578"
+Proximity Screening - Habitations,2 km to 5 km,204,31.24,"Population: 64,463 (27.74%), Households: 13,978"
+Proximity Screening - Habitations,5 km to 10 km,255,39.05,"Population: 93,965 (40.44%), Households: 21,145"
+Proximity Screening - Habitations,Beyond 10 km,113,17.3,"Population: 46,170 (19.87%), Households: 10,108"
+Proximity Screening - Population,Inside Candidate Hazard-Based Red Zone,0,0.0,"Habitations: 0, Households: 0"
+Proximity Screening - Population,Within 500 m,5305,2.28,"Habitations: 14, Households: 1,088"
+Proximity Screening - Population,500 m to 1 km,4858,2.09,"Habitations: 16, Households: 985"
+Proximity Screening - Population,1 km to 2 km,17599,7.57,"Habitations: 51, Households: 3,578"
+Proximity Screening - Population,2 km to 5 km,64463,27.74,"Habitations: 204, Households: 13,978"
+Proximity Screening - Population,5 km to 10 km,93965,40.44,"Habitations: 255, Households: 21,145"
+Proximity Screening - Population,Beyond 10 km,46170,19.87,"Habitations: 113, Households: 10,108"

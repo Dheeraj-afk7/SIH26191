@@ -1,182 +1,133 @@
-# Step 8 -- Habitation Hazard Exposure Report
+# Step 8 -- Habitation Hazard Exposure & Proximity Screening Report
 
-**Generated:** 2026-08-28T20:26:16Z  
+**Generated:** 2026-08-28T20:34:16Z  
 **Project:** SIH26191 -- Rudraprayag District, Uttarakhand  
 **Pilot District:** Rudraprayag  
 **Status:** DECISION SUPPORT SCREENING OUTPUT -- Requires Official Verification  
 
 ---
 
-> **IMPORTANT DISCLAIMER**
+## 1. Decision-Support Disclaimer
+
+> **DECISION-SUPPORT DISCLAIMER**
 >
-> This report presents population exposure screening based on the current
-> **Candidate Hazard-Based Red Zone** layer (Step 7 output).
+> These outputs are preliminary GIS-based decision-support screening results
+> and do not constitute disaster prediction, engineering safety certification,
+> evacuation instruction, or mandatory relocation recommendation.
 >
-> These results are **NOT**:
-> - Evacuation orders
-> - Disaster predictions
-> - Mandatory relocation recommendations
-> - Engineering safety certifications
-> - Official government hazard zone declarations
->
-> All outputs require official verification and geotechnical assessment
-> before any administrative action.
+> Official administrative action requires verification by competent geotechnical
+> and disaster management authorities.
 
 ---
 
-## Step 7 Red Zone Input Summary
+## 2. Executive Summary & Key Findings
 
-| Parameter | Value |
-|-----------|-------|
-| File | `data\outputs\candidate_hazard_based_red_zones.geojson` |
-| Feature count | 289 |
-| Geometry type | Polygon / MultiPolygon |
-| CRS | EPSG:32644 |
-| Zone label | Candidate Hazard-Based Red Zone |
+### A. Direct Overlap
+Direct centroid-based overlap analysis found that **0 habitation centroids** were located inside the current Candidate Hazard-Based Red Zone polygons.
 
----
+### B. Proximity Screening
+Proximity screening identified multiple habitation centroids near Candidate Hazard-Based Red Zones, including **14 within 500 m** and the nearest identified habitation at approximately **42.5 m**.
 
-## Habitation Baseline Summary
-
-| Parameter | Value |
-|-----------|-------|
-| File | `data\processed\habitations\habitation_baseline.geojson` |
-| Feature count | 653 |
-| Geometry type | Point (village centroids) |
-| CRS | EPSG:32644 |
-| Source | Census PCA 2011 joined to SHRUG spatial bridge |
+### C. Methodological Limitation
+Village centroid locations represent reference points for habitations and do not represent complete settlement extents, building footprints, or individual household locations. Accordingly, the absence of direct centroid overlap should not be interpreted as evidence that no population or infrastructure is potentially affected.
 
 ---
 
-## Spatial Operation
+## 3. Dataset Inputs & Geometry Overview
 
-| Parameter | Detail |
-|-----------|--------|
-| Method | Point-in-Polygon spatial join (GeoPandas sjoin) |
-| Predicate | `within` (habitation centroid falls inside red zone polygon) |
-| Both layers in metric CRS | EPSG:32644 (UTM Zone 44N) |
-| Overlay type | Left join (all habitations retained) |
+| Dataset | File Path | Features | Geometry Type | CRS |
+|---------|-----------|----------|---------------|-----|
+| Habitation Baseline | `data\processed\habitations\habitation_baseline.geojson` | 653 | Point (Village Centroids) | EPSG:32644 |
+| Step 7 Red Zones | `data\outputs\candidate_hazard_based_red_zones.geojson` | 289 | Polygon / MultiPolygon | EPSG:32644 |
 
 ---
 
-## Exposure Results
+## 4. Direct Centroid-Based Overlap Results
 
-### Habitation Records
-
-| Metric | Count | Percentage |
-|--------|-------|------------|
-| Total habitation records | 653 | 100.0% |
-| Inside Candidate Hazard-Based Red Zone | 0 | 0.0% |
-| Outside Candidate Hazard-Based Red Zone | 653 | 100.0% |
-
-### Population Exposure
-
-| Metric | Value | Percentage |
-|--------|-------|------------|
-| Total population (Census PCA 2011) | 232,360 | 100.0% |
-| Population inside Candidate Red Zones | 0 | 0.0% |
-| Population outside Candidate Red Zones | 232,360 | 100.0% |
-
-### Household Exposure
-
-| Metric | Value | Percentage |
-|--------|-------|------------|
-| Total households (Census PCA 2011) | 50,882 | 100.0% |
-| Households inside Candidate Red Zones | 0 | 0.0% |
-| Households outside Candidate Red Zones | 50,882 | 100.0% |
-
-### SC Population Exposure
-
-| Metric | Value | Percentage |
-|--------|-------|------------|
-| Total SC population | 46,279 | 100.0% |
-| SC population inside Candidate Red Zones | 0 | 0.0% |
-| SC population outside Candidate Red Zones | 46,279 | 100.0% |
-
-### ST Population Exposure
-
-| Metric | Value | Percentage |
-|--------|-------|------------|
-| Total ST population | 309 | 100.0% |
-| ST population inside Candidate Red Zones | 0 | 0.0% |
-| ST population outside Candidate Red Zones | 309 | 100.0% |
+| Demographic Metric | Total Inhabited Baseline | Direct Overlap (Inside) | Outside Red Zone Polygons |
+|--------------------|-------------------------|-------------------------|---------------------------|
+| Habitation Records | 653 | **0 (0.0%)** | 653 (100.0%) |
+| Total Population (TOT_P) | 232,360 | **0 (0.0%)** | 232,360 (100.0%) |
+| Total Households (No_HH) | 50,882 | **0 (0.0%)** | 50,882 (100.0%) |
+| SC Population (P_SC) | 46,279 | **0 (0.0%)** | 46,279 (100.0%) |
+| ST Population (P_ST) | 309 | **0 (0.0%)** | 309 (100.0%) |
 
 ---
 
-## Proximity Context: Distance to Nearest Candidate Red Zone
+## 5. Proximity Screening Results
 
-> **Methodological Note on the 0-Inside Result**
->
-> No village centroids fall **inside** a Candidate Hazard-Based Red Zone polygon.
-> This is a **geographically valid and expected result**, not a pipeline error.
->
-> Explanation:
-> - SHRUG village centroids represent the **administrative village boundary centroid**,
->   not precise building or household locations.
-> - Candidate Hazard-Based Red Zones are **small terrain-derived patches** (avg area ~7,721 m2)
->   derived from steep/wet raster cells, which tend to occupy ridge flanks and
->   valley corridor areas -- not village administrative centres.
-> - The 289 red zones cover a **total of ~223 ha** across a large mountainous district.
->
-> The distance-to-nearest-red-zone field (`dist_to_nearest_redzone_m`) provides
-> critical proximity context for decision-makers.
+To provide rigorous decision-support context beyond single-point centroids, Euclidean distances from each village centroid to the boundary of the nearest Candidate Hazard-Based Red Zone were computed in metric CRS (EPSG:32644).
 
-### Distance from Village Centroid to Nearest Candidate Red Zone
+### Distance Statistics
 
-| Metric | Value |
-|--------|-------|
-| Minimum distance (closest village) | 42.5 m |
-| Maximum distance | 16712.2 m |
-| Mean distance | 6212.8 m |
+- **Minimum Distance (Closest Village Centroid):** 42.5 m (Village: Marora, ID: 42573)
+- **Maximum Distance:** 16712.2 m
+- **Mean Distance:** 6212.8 m
+- **Median Distance:** 5613.5 m
 
 ### Proximity Band Breakdown
 
-| Distance Band | Habitation Count | Percentage |
-|---------------|-----------------|------------|
-| < 500 m | 14 | 2.1% |
-| 500 m -- 1,000 m | 16 | 2.5% |
-| 1,000 m -- 2,000 m | 51 | 7.8% |
-| 2,000 m -- 5,000 m | 204 | 31.2% |
-| > 5,000 m | 368 | 56.4% |
+| Proximity Band | Habitations | % Habitations | Population | % Population | Households | % Households |
+|----------------|------------|---------------|------------|--------------|------------|--------------|
+| Inside Candidate Hazard-Based Red Zone | 0 | 0.00% | 0 | 0.00% | 0 | 0.00% |
+| Within 500 m | 14 | 2.14% | 5,305 | 2.28% | 1,088 | 2.14% |
+| 500 m to 1 km | 16 | 2.45% | 4,858 | 2.09% | 985 | 1.94% |
+| 1 km to 2 km | 51 | 7.81% | 17,599 | 7.57% | 3,578 | 7.03% |
+| 2 km to 5 km | 204 | 31.24% | 64,463 | 27.74% | 13,978 | 27.47% |
+| 5 km to 10 km | 255 | 39.05% | 93,965 | 40.44% | 21,145 | 41.56% |
+| Beyond 10 km | 113 | 17.30% | 46,170 | 19.87% | 10,108 | 19.87% |
 
-**NOTE:** Proximity does not equal exposure. A village centroid being close to
-a red zone boundary does not mean the village area is inside the red zone.
-Field verification and site-level geotechnical assessment is required.
+### Nearest Habitations to Candidate Hazard-Based Red Zones (< 500 m)
 
----
-
-## Validation Cross-Checks
-
-| Check | Expected | Actual | Status |
-|-------|----------|--------|--------|
-| Exposure records = baseline records | 653 | 653 | PASS |
-| Inside pop + outside pop = total pop | 232,360 | 232,360 | PASS |
-| Inside HH + outside HH = total HH | 50,882 | 50,882 | PASS |
-| Inside SC + outside SC = total SC | 46,279 | 46,279 | PASS |
-| Inside ST + outside ST = total ST | 309 | 309 | PASS |
-| CRS consistency | EPSG:32644 | EPSG:32644 | PASS |
-
----
-
-## Output Files
-
-| File | Description |
-|------|-------------|
-| `data\processed\exposure\habitation_exposure.geojson` | Habitation exposure layer (GeoJSON, EPSG:32644) |
-| `data\processed\exposure\habitation_exposure_summary.csv` | Exposure summary table (CSV) |
-| `docs\step8_habitation_exposure_report.md` | This report |
+| Village Code | Village Name | Nearest Zone ID | Distance (m) | Population | Households |
+|--------------|--------------|-----------------|--------------|------------|------------|
+| 42573 | Marora | RZ-220 | 42.5 m | 208 | 49 |
+| 42067 | Tarsali | RZ-018 | 178.5 m | 98 | 20 |
+| 42070 | Khat | RZ-078 | 257.7 m | 271 | 54 |
+| 42165 | Dungar semala | RZ-048 | 310.8 m | 580 | 110 |
+| 42320 | Narkota | RZ-250 | 321.5 m | 357 | 83 |
+| 42129 | Gadagu | RZ-152 | 330.5 m | 601 | 117 |
+| 42080 | Jaltalla | RZ-045 | 349.1 m | 373 | 79 |
+| 42086 | Kabiltha | RZ-261 | 349.6 m | 341 | 62 |
+| 42081 | Chaumasi | RZ-177 | 379.1 m | 284 | 57 |
+| 42127 | Burua | RZ-091 | 410.6 m | 386 | 71 |
+| 42128 | Madali | RZ-174 | 425.1 m | 5 | 2 |
+| 42058 | Gaurikund | RZ-008 | 468.8 m | 223 | 43 |
+| 42118 | Gaundar | RZ-145 | 486.4 m | 294 | 45 |
+| 42574 | Mawana | RZ-220 | 497.6 m | 1,284 | 296 |
 
 ---
 
-## Hazard Zone Flag Definition
+## 6. Output Schema & Standardized Fields
 
-| Field | Value | Meaning |
-|-------|-------|---------|
-| `hazard_zone_flag` | `1` | Inside Candidate Hazard-Based Red Zone |
-| `hazard_zone_flag` | `0` | Outside Candidate Hazard-Based Red Zone |
+| Field Name | Type | Description |
+|------------|------|-------------|
+| `village_id` | Integer | Census 2011 Town/Village identifier code |
+| `village_name` | String | Official Census village name |
+| `tot_pop` | Integer | Total village population (Census PCA 2011) |
+| `households` | Integer | Number of households (Census PCA 2011) |
+| `pop_sc` | Integer | Scheduled Caste population |
+| `pop_st` | Integer | Scheduled Tribe population |
+| `direct_zone_overlap` | Boolean | True if centroid directly intersects Candidate Red Zone |
+| `hazard_zone_flag` | Integer | 1 = Inside, 0 = Outside (backward compatibility) |
+| `hazard_zone_label` | String | Standardized textual overlap label |
+| `nearest_hazard_distance_m` | Float | Distance in meters to nearest Candidate Red Zone (EPSG:32644) |
+| `proximity_band` | String | Descriptive proximity category (7 standard bands) |
+| `nearest_zone_id` | String | Identifier of the closest Candidate Red Zone polygon |
+| `geometry` | Geometry | Point centroid in metric CRS (EPSG:32644) |
 
-**These flags do NOT indicate safe or unsafe status.**
-**They represent preliminary spatial screening only.**
+---
+
+## 7. Validation Cross-Checks
+
+| Check Description | Expected | Actual | Status |
+|-------------------|----------|--------|--------|
+| Total Exposure Records | 653 | 653 | PASS |
+| Direct Overlap + Outside Population = Total Pop | 232,360 | 232,360 | PASS |
+| Direct Overlap + Outside Households = Total HH | 50,882 | 50,882 | PASS |
+| Proximity Band Record Sum = Total Habitations | 653 | 653 | PASS |
+| Proximity Band Population Sum = Total Population | 232,360 | 232,360 | PASS |
+| Coordinate Reference System | EPSG:32644 | EPSG:32644 | PASS |
 
 ---
 
