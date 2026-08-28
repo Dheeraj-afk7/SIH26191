@@ -1,0 +1,21 @@
+category,metric,value,percentage,notes
+Habitation Records,Total habitation records,653,100.0,All 653 villages from habitation baseline
+Habitation Records,Inside Candidate Hazard-Based Red Zone,0,0.0,Centroid falls within a red zone polygon
+Habitation Records,Outside Candidate Hazard-Based Red Zone,653,100.0,Centroid does not intersect any red zone
+Population (TOT_P),Total population,232360,100.0,Census PCA 2011
+Population (TOT_P),Population inside red zones,0,0.0,
+Population (TOT_P),Population outside red zones,232360,100.0,
+Households (No_HH),Total households,50882,100.0,Census PCA 2011
+Households (No_HH),Households inside red zones,0,0.0,
+Households (No_HH),Households outside red zones,50882,100.0,
+SC Population (P_SC),Total SC population,46279,100.0,Census PCA 2011
+SC Population (P_SC),SC population inside red zones,0,0.0,
+SC Population (P_SC),SC population outside red zones,46279,100.0,
+ST Population (P_ST),Total ST population,309,100.0,Census PCA 2011
+ST Population (P_ST),ST population inside red zones,0,0.0,
+ST Population (P_ST),ST population outside red zones,309,100.0,
+Proximity to Red Zone,Habitations < 500 m from nearest Candidate Red Zone,14,2.14,Centroid proximity (not inside zone)
+Proximity to Red Zone,"Habitations 500 m - 1,000 m from nearest Candidate Red Zone",16,2.45,
+Proximity to Red Zone,"Habitations 1,000 m - 2,000 m from nearest Candidate Red Zone",51,7.81,
+Proximity to Red Zone,"Habitations 2,000 m - 5,000 m from nearest Candidate Red Zone",204,31.24,
+Proximity to Red Zone,"Habitations > 5,000 m from nearest Candidate Red Zone",368,56.36,
