@@ -1,5 +1,6 @@
 import React from 'react';
 import { LucideIcon } from 'lucide-react';
+import { InfoTooltip } from './InfoTooltip';
 
 interface KPICardProps {
   label: string;
@@ -9,6 +10,9 @@ interface KPICardProps {
   icon?: LucideIcon;
   iconBg?: string;
   iconColor?: string;
+  tooltipTitle?: string;
+  tooltipContent?: string;
+  tooltipFormula?: string;
   onClick?: () => void;
   className?: string;
 }
@@ -21,6 +25,9 @@ export const KPICard: React.FC<KPICardProps> = ({
   icon: Icon,
   iconBg = 'bg-slate-100',
   iconColor = 'text-slate-600',
+  tooltipTitle,
+  tooltipContent,
+  tooltipFormula,
   onClick,
   className = '',
 }) => {
@@ -35,9 +42,20 @@ export const KPICard: React.FC<KPICardProps> = ({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
-            {label}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-tight">
+              {label}
+            </p>
+            {tooltipContent && (
+              <InfoTooltip
+                title={tooltipTitle || label}
+                content={tooltipContent}
+                formula={tooltipFormula}
+                side="top"
+                size="xs"
+              />
+            )}
+          </div>
           <p className="mt-1.5 text-2xl font-bold text-slate-900 tracking-tight leading-none">
             {value}
           </p>

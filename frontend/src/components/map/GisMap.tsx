@@ -10,6 +10,7 @@ import { formatNumber, formatDistance, formatHectares } from '../../utils/format
 import { reprojectGeoJson, toLeafletLatLng } from '../../utils/projection';
 import { MapLegend } from './MapLegend';
 import { PriorityBadge } from '../shared/PriorityBadge';
+import { InfoTooltip } from '../shared/InfoTooltip';
 
 export const GisMap: React.FC = () => {
   const [map, setMap] = useState<LeafletMap | null>(null);
@@ -80,6 +81,11 @@ export const GisMap: React.FC = () => {
           <div className="flex items-center gap-1 font-bold text-slate-800">
             <Layers className="w-4 h-4 text-blue-600" />
             <span className="hidden sm:inline">Layers:</span>
+            <InfoTooltip
+              title="GIS Spatial Layers"
+              content="Toggle visibility of multi-hazard red zones and candidate relocation terrain polygons on the map."
+              side="bottom"
+            />
           </div>
 
           <label className="flex items-center gap-1.5 cursor-pointer select-none text-slate-700 font-medium hover:text-slate-900">
@@ -130,18 +136,29 @@ export const GisMap: React.FC = () => {
               </button>
             );
           })}
+          <InfoTooltip
+            title="Map Priority Tier Filter"
+            content="Toggle visibility of habitation markers based on their assigned priority tier on the map."
+            side="bottom"
+          />
         </div>
       </div>
 
       {/* Reset View Button Top Right */}
-      <div className="absolute top-3 right-3 z-[1000]">
+      <div className="absolute top-3 right-3 z-[1000] flex items-center gap-1">
         <button
           onClick={handleResetView}
           className="p-2 bg-white/95 backdrop-blur-sm rounded-lg border border-slate-300 shadow-md text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center"
           title="Reset View to Rudraprayag Extent"
+          aria-label="Reset View"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
+        <InfoTooltip
+          title="Reset Map View"
+          content="Recenter the map viewport back to default Rudraprayag District coordinates (Lat: 30.40°N, Lon: 79.05°E, Zoom: 10)."
+          side="left"
+        />
       </div>
 
       {/* Bottom Left Legend */}
