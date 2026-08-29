@@ -1,0 +1,446 @@
+# ==============================================================================
+# SIH26191 — Central Project Configuration
+# ==============================================================================
+# Project: Intelligent Identification of Hazard-Based Red Zones, Carrying Capacity
+#          Assessment, and Immediate Relocation Needs for Vulnerable Habitations
+# Primary Pilot: Rudraprayag District, Uttarakhand, India
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Project Metadata
+# ------------------------------------------------------------------------------
+project:
+  id: "SIH26191"
+  name: "Intelligent Identification of Hazard-Based Red Zones, Carrying Capacity Assessment, and Immediate Relocation Needs for Vulnerable Habitations"
+  short_title: "Hazard Red Zone & Relocation Decision Support"
+  pilot_district: "Rudraprayag"
+  state: "Uttarakhand"
+  country: "India"
+
+# ------------------------------------------------------------------------------
+# 2. Coordinate Reference System (CRS) Configuration
+# ------------------------------------------------------------------------------
+crs:
+  # Base geographic storage and API presentation CRS (WGS 84)
+  storage_crs: "EPSG:4326"
+  
+  # Default projected metric CRS for distance and area calculations.
+  # Terrain derivatives such as slope will use CRS handling defined by the relevant processing module.
+  # Note: For Rudraprayag, UTM Zone 44N (EPSG:32644) is standard.
+  # NOTE TO OPERATORS: This metric CRS must be validated against the exact
+  # geographic extent of the target district prior to spatial calculations.
+  analysis_crs_metric: "EPSG:32644"
+
+# ------------------------------------------------------------------------------
+# 3. Data Directory & Dataset Paths
+# ------------------------------------------------------------------------------
+paths:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  outputs_dir: "data/outputs"
+  
+  # Primary Verified Input DEM
+  dem_raw: "data/raw/copernicus_glo30_rudraprayag.tif"
+  
+  # Terrain Derivative Datasets (Step 3)
+  slope_processed: "data/processed/terrain/slope_degrees.tif"
+  aspect_processed: "data/processed/terrain/aspect_degrees.tif"
+  
+  # Hazard Datasets (Step 4)
+  hazards_dir: "data/processed/hazards"
+  terrain_susceptibility_proxy: "data/processed/hazards/terrain_susceptibility_proxy.tif"
+  terrain_susceptibility_classes: "data/processed/hazards/terrain_susceptibility_classes.tif"
+
+  # Hydrology & Flood Screening Datasets (Step 5)
+  hydrology_dir: "data/processed/hydrology"
+  flow_direction: "data/processed/hydrology/flow_direction.tif"
+  flow_accumulation: "data/processed/hydrology/flow_accumulation.tif"
+  topographic_wetness_index: "data/processed/hydrology/topographic_wetness_index.tif"
+  flood_exposure_proxy: "data/processed/hazards/flood_exposure_proxy.tif"
+  flood_exposure_classes: "data/processed/hazards/flood_exposure_classes.tif"
+
+  # Multi-Hazard Integration Datasets (Step 6)
+  multihazard_dir: "data/processed/hazards"
+  multihazard_score: "data/processed/hazards/multihazard_score.tif"
+  multihazard_classes: "data/processed/hazards/multihazard_classes.tif"
+  terrain_contribution: "data/processed/hazards/terrain_contribution.tif"
+  flood_contribution: "data/processed/hazards/flood_contribution.tif"
+
+  # Candidate Hazard-Based Red Zone Outputs (Step 7)
+  redzones_dir: "data/outputs"
+  redzones_gpkg: "data/outputs/candidate_hazard_based_red_zones.gpkg"
+  redzones_geojson: "data/outputs/candidate_hazard_based_red_zones.geojson"
+  redzones_raster: "data/processed/hazards/candidate_redzone_raster.tif"
+
+
+# ------------------------------------------------------------------------------
+# 4. Pilot Scope Configuration
+# ------------------------------------------------------------------------------
+pilot:
+  enabled: true
+  district_name: "Rudraprayag"
+  state_name: "Uttarakhand"
+  
+  # Bounding Box Note:
+  # Do NOT hardcode bounding box parameters in this configuration.
+  # The spatial extent must be dynamically derived from verified administrative
+  # boundary datasets once acquired and loaded into the processing pipeline.
+  derive_extent_from_boundary: true
+
+# ------------------------------------------------------------------------------
+# 5. Standardized Output Terminology
+# ------------------------------------------------------------------------------
+# Strictly enforced terminology across processing outputs, backend API responses,
+# report exports, and UI components to avoid over-claiming or illegal authority.
+terminology:
+  hazard_zone_label: "Candidate Hazard-Based Red Zone"
+  hazard_zone_secondary_label: "Candidate Hazard Zone"
+  relocation_site_label: "Candidate Topographically Feasible Site"
+  carrying_capacity_label: "Preliminary Spatial Capacity Estimate"
+  flood_exposure_label: "Terrain-Derived Flood Exposure Indicator"
+  flood_exposure_secondary_label: "Hydrological Terrain Screening Indicator"
+  multihazard_label: "Multi-Hazard Screening Indicator"
+  multihazard_secondary_label: "Multi-Hazard Screening Score"
+  decision_support_disclaimer: "Decision Support — Requires Official Verification & Geotechnical Assessment"
+
+# ------------------------------------------------------------------------------
+# 6. Core Processing Principles & System Constraints
+# ------------------------------------------------------------------------------
+principles:
+  # Spatial calculations are fully deterministic and rule-based
+  deterministic: true
+  
+  # Decisions and priority ranks must have transparent, step-by-step scoring
+  explainable: true
+  
+  # All inputs must stem from verified, citable datasets
+  evidence_based: true
+  
+  # Software provides decision support/recommendations; it NEVER authorizes relocation
+  human_in_the_loop: true
+  relocation_authorization_allowed: false
+  
+  # System does NOT perform live real-time predictions or assume live government APIs
+  real_time_prediction: false
+  
+  # AI/ML/LLM components, if added in the future, must never govern
+  # safety-critical spatial scores, hazard classifications, or relocation decisions.
+  ai_governs_spatial_decisions: false
+  
+  # Data update model contract: new data -> validate -> recalculate -> updated outputs
+  dynamic_update_contract:
+    - input_validation
+    - pipeline_recalculation
+    - output_refresh
+
+# ------------------------------------------------------------------------------
+# 7. Scalability & Generalization
+# ------------------------------------------------------------------------------
+# Generalization settings to ensure the pipeline scales to other districts in India.
+scalability:
+  allow_district_override: true
+  config_driven_pipeline: true
+
+# ------------------------------------------------------------------------------
+# 8. Terrain Susceptibility Proxy Configuration (Step 4)
+# ------------------------------------------------------------------------------
+terrain_susceptibility:
+  enabled: true
+  methodology_version: "1.0"
+  description: "Deterministic terrain-derived landslide susceptibility proxy based on normalized slope steepness."
+  
+  slope:
+    enabled: true
+    role: "primary"
+    description: "Slope angle in degrees derived from Copernicus GLO-30 DEM in metric CRS (EPSG:32644)."
+    min_slope_deg: 0.0
+    max_slope_deg: 60.0  # Slope angle at which terrain steepness predisposition reaches maximum score (1.0)
+    transformation: "linear_clipped"  # score = clip((slope - min_slope) / (max_slope - min_slope), 0.0, 1.0)
+    
+  aspect:
+    enabled: true
+    role: "contextual"
+    description: "Aspect in degrees (0-360, -1 for flat). Maintained as contextual terrain metadata without arbitrary hazard weighting."
+    weight: 0.0  # Explicit 0.0 weight to avoid uncalibrated subjective weighting
+    
+  classification:
+    method: "threshold_intervals"
+    description: "Preliminary terrain screening categories based on score thresholds."
+    nodata_value: 255
+    classes:
+      - code: 1
+        label: "Lower Terrain Susceptibility Indicator"
+        score_min: 0.0
+        score_max: 0.35
+        slope_approx_range: "< 21.0 deg"
+        description: "Gentler terrain where topographic slope contributes relatively less to gravitational shear stress."
+      - code: 2
+        label: "Moderate Terrain Susceptibility Indicator"
+        score_min: 0.35
+        score_max: 0.65
+        slope_approx_range: "21.0 deg - 39.0 deg"
+        description: "Moderate slope gradients commonly observed across middle Himalayan valley flanks."
+      - code: 3
+        label: "Higher Terrain Susceptibility Indicator"
+        score_min: 0.65
+        score_max: 1.00
+        slope_approx_range: ">= 39.0 deg"
+        description: "Steep to precipitous terrain where gravitational slope angle is a prominent predisposing factor."
+
+  output:
+    proxy_name: "Terrain-Derived Landslide Susceptibility Proxy"
+    classes_name: "Terrain-Derived Landslide Susceptibility Screening Classes"
+    disclaimer: "Preliminary terrain-derived susceptibility proxy for decision support. Does not represent landslide prediction, statistical probability, engineering safety certification, or official hazard zone declaration."
+
+# ------------------------------------------------------------------------------
+# 9. Hydrology & Terrain-Derived Flood Exposure Configuration (Step 5)
+# ------------------------------------------------------------------------------
+hydrology:
+  enabled: true
+  methodology_version: "1.0"
+  description: "Deterministic terrain-derived hydrological screening and flood exposure indicator based on D8 flow routing and Topographic Wetness Index (TWI)."
+
+  labels:
+    flood_exposure_label: "Terrain-Derived Flood Exposure Indicator"
+    flood_exposure_secondary_label: "Hydrological Terrain Screening Indicator"
+    proxy_name: "Terrain-Derived Flood Exposure Proxy"
+    classes_name: "Terrain-Derived Flood Exposure Screening Classes"
+    disclaimer: "Preliminary terrain-derived hydrological screening indicator for decision support. Does not represent flood prediction, forecasting, inundation probability, official flood zone mapping, or safety/relocation authorization."
+
+  derivatives:
+    flow_direction:
+      method: "D8"
+      description: "Deterministic 8-direction steepest downhill descent (ESRI encoding: 1=E, 2=SE, 4=S, 8=SW, 16=W, 32=NW, 64=N, 128=NE, 0=sink/flat, 255=NoData)."
+      output_path: "data/processed/hydrology/flow_direction.tif"
+    
+    flow_accumulation:
+      method: "topological_downhill_accumulation"
+      unit: "cells"
+      description: "Cumulative upslope contributing area counted in grid cell units."
+      output_path: "data/processed/hydrology/flow_accumulation.tif"
+      
+    topographic_wetness_index:
+      method: "beven_kirkby_1979"
+      formula: "ln(a / tan(beta))"
+      min_slope_deg: 0.1  # Numerical safeguard floor for slope angle in degrees to prevent division by zero / singularity
+      description: "Topographic Wetness Index (TWI) representing relative tendency to water accumulation and soil saturation."
+      output_path: "data/processed/hydrology/topographic_wetness_index.tif"
+
+  proxy:
+    method: "normalized_twi"
+    description: "Normalized continuous flood exposure proxy derived monotonically from Topographic Wetness Index (TWI)."
+    twi_min: 3.5   # Baseline threshold below which terrain is purely shedding/dry ridge (score = 0.0)
+    twi_max: 13.5  # Saturation threshold where valley convergence reaches maximum score (1.0)
+    transformation: "linear_clipped"  # score = clip((TWI - twi_min) / (twi_max - twi_min), 0.0, 1.0)
+    output_path: "data/processed/hazards/flood_exposure_proxy.tif"
+
+  classification:
+    method: "threshold_intervals"
+    description: "Preliminary terrain hydrological screening categories based on score thresholds."
+    nodata_value: 255
+    output_path: "data/processed/hazards/flood_exposure_classes.tif"
+    classes:
+      - code: 1
+        label: "Lower Terrain-Derived Flood Exposure Indicator"
+        score_min: 0.00
+        score_max: 0.35
+        twi_approx_range: "< 7.00"
+        description: "Steeper slopes, crests, and shedding terrain with low upslope catchment accumulation."
+      - code: 2
+        label: "Moderate Terrain-Derived Flood Exposure Indicator"
+        score_min: 0.35
+        score_max: 0.65
+        twi_approx_range: "7.00 - 10.00"
+        description: "Intermediate slopes, hollows, and secondary tributary flow paths with moderate hydrological convergence."
+      - code: 3
+        label: "Higher Terrain-Derived Flood Exposure Indicator"
+        score_min: 0.65
+        score_max: 1.00
+        twi_approx_range: ">= 10.00"
+        description: "Valley bottoms, channel corridors, river terraces, and highly convergent drainage zones."
+
+# ------------------------------------------------------------------------------
+# 10. Multi-Hazard Integration Configuration (Step 6)
+# ------------------------------------------------------------------------------
+multihazard:
+  enabled: true
+  methodology_version: "1.0"
+  description: "Deterministic linear weighted combination of terrain susceptibility and flood exposure screening proxies."
+
+  inputs:
+    terrain_susceptibility_proxy: "data/processed/hazards/terrain_susceptibility_proxy.tif"
+    flood_exposure_proxy: "data/processed/hazards/flood_exposure_proxy.tif"
+
+  outputs:
+    multihazard_score: "data/processed/hazards/multihazard_score.tif"
+    multihazard_classes: "data/processed/hazards/multihazard_classes.tif"
+    terrain_contribution: "data/processed/hazards/terrain_contribution.tif"
+    flood_contribution: "data/processed/hazards/flood_contribution.tif"
+
+  weights:
+    terrain_weight: 0.5
+    flood_weight: 0.5
+    weight_rationale: "Initial equal-weight screening baseline assumption in the absence of calibrated empirical damage inventories."
+
+  classification:
+    method: "threshold_intervals"
+    description: "Preliminary multi-hazard screening categories based on combined score intervals."
+    nodata_value: 255
+    classes:
+      - code: 1
+        label: "Lower Multi-Hazard Indicator"
+        score_min: 0.00
+        score_max: 0.35
+        description: "Lower combined terrain slope and hydrological convergence predisposition."
+      - code: 2
+        label: "Moderate Multi-Hazard Indicator"
+        score_min: 0.35
+        score_max: 0.65
+        description: "Moderate combined slope gradient or intermediate hydrological convergence."
+      - code: 3
+        label: "Higher Multi-Hazard Indicator"
+        score_min: 0.65
+        score_max: 1.00
+        description: "Higher combined terrain susceptibility (steep terrain) and/or high flood exposure (valley corridors/confluences)."
+
+  labels:
+    indicator_name: "Multi-Hazard Screening Score"
+    classes_name: "Multi-Hazard Screening Classes"
+    disclaimer: "Preliminary multi-hazard screening indicator for decision support. Does not represent disaster prediction, official hazard zone, government red zone, safe/unsafe certification, evacuation order, or relocation authorization."
+
+# ------------------------------------------------------------------------------
+# 11. Candidate Hazard-Based Red Zone Generation Configuration (Step 7)
+# ------------------------------------------------------------------------------
+redzones:
+  enabled: true
+  methodology_version: "1.0"
+  description: "Deterministic connected-component spatial grouping and minimum mapping unit filtering of Higher Multi-Hazard Indicator areas into Candidate Hazard-Based Red Zones."
+
+  inputs:
+    multihazard_classes: "data/processed/hazards/multihazard_classes.tif"
+    multihazard_score: "data/processed/hazards/multihazard_score.tif"
+    terrain_contribution: "data/processed/hazards/terrain_contribution.tif"
+    flood_contribution: "data/processed/hazards/flood_contribution.tif"
+
+  outputs:
+    output_vector: "data/outputs/candidate_hazard_based_red_zones.gpkg"
+    output_geojson: "data/outputs/candidate_hazard_based_red_zones.geojson"
+    output_raster: "data/processed/hazards/candidate_redzone_raster.tif"
+
+  segmentation:
+    source_class: 3
+    source_class_label: "Higher Multi-Hazard Indicator"
+    connectivity: 8  # 8-neighbour connectivity for contiguous cluster identification (options: 4, 8)
+    id_prefix: "RZ-"
+    id_format: "RZ-{:03d}"
+
+  filtering:
+    minimum_zone_area_m2: 5000.0  # Minimum mapping unit (MMU) threshold in m2 (~0.50 hectares / ~6 pixels)
+    mmu_rationale: "Minimum mapping unit for preliminary spatial grouping to filter out isolated micro-pixel clusters below 0.50 ha."
+
+  priority_ranking:
+    primary_key: "mean_multihazard_score"
+    secondary_key: "max_multihazard_score"
+    tertiary_key: "area_m2"
+    sort_order: "descending"
+    basis_description: "Mean multi-hazard score, then maximum score, then area"
+
+  labels:
+    zone_label: "Candidate Hazard-Based Red Zone"
+    source_indicator: "Higher Multi-Hazard Indicator"
+    methodology: "Deterministic terrain and hydrology screening"
+    disclaimer: "Decision Support — Requires Official Verification & Geotechnical Assessment"
+
+# ------------------------------------------------------------------------------
+# 12. Candidate Topographically Feasible Area Configuration (Step 9)
+# ------------------------------------------------------------------------------
+# Identifies Candidate Topographically Feasible Areas using deterministic
+# terrain-based screening of available raster datasets.
+#
+# MANDATORY DISCLAIMER:
+# Outputs are preliminary decision-support candidates requiring field verification.
+# Not an official site authorization or safety certification.
+# Geotechnical and infrastructure assessment required before any relocation action.
+#
+# CONFIGURABLE PARAMETERS:
+# Set to null -> operation is SKIPPED and logged as NOT_CONFIGURED in metadata.
+# Set to a value WITH documented justification -> operation is applied.
+# Re-run the pipeline after updating any parameter to regenerate outputs.
+# ------------------------------------------------------------------------------
+candidate_areas:
+  enabled: true
+  methodology_version: "1.0"
+  description: >-
+    Deterministic terrain-based screening to identify Candidate Topographically
+    Feasible Areas for preliminary decision support.
+    Outputs are NOT safe site certifications or official authorizations.
+
+  # ── DETERMINISTIC EXCLUSIONS (always applied — no team decision required) ───
+  # These are fixed and internally consistent with the Steps 4–7 methodology.
+  deterministic_exclusions:
+    exclude_mh_class_3: true      # Higher Multi-Hazard Indicator pixels excluded
+    exclude_flood_class_3: true   # Higher Flood Exposure Indicator pixels excluded
+    exclude_redzone_pixels: true  # Step 7 Candidate Red Zone raster pixels excluded
+    exclude_nodata: true          # Pixels with any NoData in required inputs excluded
+
+  # ── CONFIGURABLE SCREENING PARAMETERS ────────────────────────────────────────
+  # null  = screening step SKIPPED, logged as NOT_CONFIGURED
+  # value = screening step applied; justification must be documented externally.
+  configurable_screening:
+    # Maximum slope threshold (degrees). Pixels where slope > value are excluded.
+    # JUSTIFICATION REQUIRED before setting: cite NDMA, IS code, or peer-reviewed source.
+    slope_max_deg: null
+
+    # Buffer distance (metres) around Candidate Red Zone polygons.
+    # null = polygon footprint exclusion only (via exclude_redzone_pixels above).
+    redzone_buffer_m: null
+
+    # Exclude Moderate Flood Exposure (Class 2) areas?
+    # null = Class 2 NOT excluded. true = additional ~8,377 ha excluded.
+    exclude_flood_class_2: null
+
+    # Exclude Moderate Multi-Hazard Indicator (Class 2) areas?
+    # null = Class 2 NOT excluded. true = additional ~205,117 ha excluded (major impact).
+    exclude_mh_class_2: null
+
+    # Maximum elevation cap (metres above sea level).
+    # null = no elevation cap applied.
+    # JUSTIFICATION REQUIRED before setting: cite planning authority source.
+    elevation_max_m: null
+
+  # ── MINIMUM MAPPING UNIT ─────────────────────────────────────────────────────
+  filtering:
+    # Minimum contiguous cluster area (m²) to retain as a Candidate Area.
+    # null = no MMU filtering — all clusters retained.
+    # Step 7 used 5000 m² for red zones; a different value may apply here.
+    minimum_area_m2: null
+
+  # ── SEGMENTATION ─────────────────────────────────────────────────────────────
+  segmentation:
+    connectivity: 8            # 8-neighbour (same as Step 7)
+    id_prefix: "CA-"
+    id_format: "CA-{:04d}"    # 4-digit pad: supports up to CA-9999
+
+  # ── OUTPUTS ──────────────────────────────────────────────────────────────────
+  outputs:
+    # Step 9B base outputs (no attribution)
+    base_gpkg:    "data/outputs/candidate_topographically_feasible_areas_base.gpkg"
+    base_geojson: "data/outputs/candidate_topographically_feasible_areas_base.geojson"
+    # Step 9C attributed outputs (appends zonal stats + proximity; preserves 9B fields)
+    attributed_gpkg:    "data/outputs/candidate_topographically_feasible_areas_attributed.gpkg"
+    attributed_geojson: "data/outputs/candidate_topographically_feasible_areas_attributed.geojson"
+    # Raster intermediates
+    exclusion_mask: "data/processed/sites/combined_exclusion_mask.tif"
+    area_raster:    "data/processed/sites/candidate_area_raster.tif"
+    # Metadata
+    metadata_json: "data/outputs/candidate_areas_metadata.json"
+
+  # ── LABELS ───────────────────────────────────────────────────────────────────
+  labels:
+    area_label: "Candidate Topographically Feasible Area"
+    area_secondary_label: "Preliminary Topographically Feasible Terrain"
+    methodology: "Deterministic terrain and hazard screening (Steps 3–7)"
+    disclaimer: >-
+      Preliminary decision-support candidate requiring field verification.
+      Not an official site authorization or safety certification.
+      Geotechnical and infrastructure assessment required before any relocation action.

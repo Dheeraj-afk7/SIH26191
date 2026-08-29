@@ -1,0 +1,67 @@
+# ==============================================================================
+# SIH26191 — Capacity Planning Standard Configuration
+# Step 10 — Preliminary Spatial Capacity Estimate
+# ==============================================================================
+#
+# STATUS: NOT CONFIGURED
+#
+# MANDATORY: A specific planning authority citation MUST be provided before
+# any per-household or per-person area assumption is applied.
+# DO NOT invent or estimate density values without a verified citation.
+#
+# When configured, re-run:
+#   python processing/capacity/build_candidate_context.py
+#
+# Until configured, all capacity outputs will carry:
+#   capacity_status = "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+# ==============================================================================
+
+capacity_version: "1.0"
+status: "NOT_CONFIGURED"
+
+configuration_note: >-
+  All capacity parameters are null. No capacity estimate will be generated
+  until a verified planning standard is provided with authoritative citation.
+  This is consistent with PROJECT_SPEC.md §3 Module 7, which requires all
+  area-per-household assumptions to be treated as explicit planning scenarios,
+  documented here, and verified before implementation.
+
+# ── Planning Standard ─────────────────────────────────────────────────────
+# MUST be completed before any capacity value is set.
+planning_standard:
+  authority: null        # e.g., "NDMA", "BIS", "State Housing Board Uttarakhand"
+  document: null         # e.g., "National Disaster Management Guidelines 2007"
+  section: null          # e.g., "Section 4.2 — Relocation Site Standards"
+  year: null
+  url: null
+  citation: null         # Full academic/government citation
+
+# ── Area Standards ────────────────────────────────────────────────────────
+# Area per household (m²). null = NOT CONFIGURED.
+# Example values that MUST NOT be used without a verified citation:
+#   NDMA guidelines (if applicable): null
+#   Uttarakhand Housing Board: null
+area_per_household_m2: null
+
+# Area per person (m²). null = NOT CONFIGURED.
+# Alternative to per-household standard.
+area_per_person_m2: null
+
+# Minimum viable plot area (m²). Minimum site area to be considered viable
+# for any relocation planning purpose. null = NOT CONFIGURED.
+minimum_viable_plot_m2: null
+
+# Maximum density (households per hectare). null = NOT CONFIGURED.
+max_density_hh_per_ha: null
+
+# ── Output Behaviour ──────────────────────────────────────────────────────
+output:
+  # Value assigned to capacity_status when no standard is configured
+  not_estimated_label: "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+  planning_note: >-
+    Spatial capacity estimate requires an authoritative planning standard
+    specifying area per household or per person. Update this config with a
+    verified standard and re-run processing/capacity/build_candidate_context.py.
+  disclaimer: >-
+    Preliminary Spatial Capacity Estimate — Engineering surveys required.
+    This is NOT an engineering-certified carrying capacity.

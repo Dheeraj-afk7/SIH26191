@@ -1,0 +1,142 @@
+# ==============================================================================
+# SIH26191 — Village Priority Classification Thresholds
+# Step 10 — Decision Engine
+# ==============================================================================
+#
+# MANDATORY DISCLAIMER:
+# These thresholds define a PRELIMINARY DECISION-SUPPORT PRIORITY CLASSIFICATION.
+# They are NOT official government relocation priorities, hazard zone declarations,
+# or engineering safety certifications.
+#
+# All outputs require official government review before any administrative action.
+#
+# METHODOLOGY:
+# Rule-based classification using verified Step 8 proximity distance and
+# Step 6 multi-hazard class at centroid location. No AHP, MCDA, or
+# uncalibrated composite weights are applied.
+#
+# To recalculate: update values below, then re-run
+#   python processing/priority/build_village_priority.py
+# ==============================================================================
+
+priority_version: "1.0"
+methodology_version: "1.0"
+
+# ── Classification Methodology ─────────────────────────────────────────────
+methodology:
+  type: "rule_based_proximity_class"
+  description: >-
+    Deterministic rule-based classification using two verified indicators:
+    (1) nearest_hazard_distance_m — Euclidean distance in metres from village
+        centroid to nearest Candidate Hazard-Based Red Zone boundary (Step 8).
+    (2) mh_class_at_centroid — Multi-Hazard Screening Class (1/2/3) sampled
+        from the Step 6 multihazard_classes.tif raster at the village centroid
+        location.
+    Hard flag: direct_zone_overlap (True if centroid inside red zone polygon).
+  disclaimer: >-
+    PRELIMINARY DECISION-SUPPORT PRIORITY — Not an official government
+    relocation priority designation. Does not constitute evacuation order,
+    relocation mandate, engineering safety certification, or official hazard
+    zone declaration.
+
+# ── Tier 1 — Attention Priority ───────────────────────────────────────────
+# Condition: direct_zone_overlap = True (hard rule, always Tier 1)
+#        OR: nearest_hazard_distance_m <= max_distance_m
+#            AND mh_class_at_centroid >= min_mh_class
+tier1:
+  label: "Tier1_AttentionPriority"
+  display_label: "Tier 1 — Attention Priority"
+  description: >-
+    Villages with very close proximity to a Candidate Hazard-Based Red Zone
+    AND Moderate or Higher multi-hazard class at the centroid location.
+    OR villages whose centroid directly overlaps a Candidate Red Zone polygon.
+  max_distance_m: 500.0
+  min_mh_class: 2    # MH Class 2 (Moderate) or 3 (Higher) at centroid
+  hard_overlap_rule: true
+  rationale: >-
+    Within 500m of a Candidate Hazard Zone with Moderate or Higher multi-hazard
+    terrain class at centroid. At this proximity, settlement extent likely
+    extends into or adjacent to screened hazard terrain. MH Class 2 threshold
+    (≥ 0.35 score) corresponds to moderate slope/TWI terrain — widely present
+    across Himalayan valley flanks. Requires official field verification.
+    IMPORTANT: This does not confirm imminent risk. Field assessment is mandatory.
+
+# ── Tier 2 — Elevated Attention ───────────────────────────────────────────
+# Condition: nearest_hazard_distance_m <= max_distance_m
+#            AND NOT Tier 1 (i.e., mh_class = 1 at close range, or dist 500-2000m)
+tier2:
+  label: "Tier2_ElevatedAttention"
+  display_label: "Tier 2 — Elevated Attention"
+  description: >-
+    Villages within close-to-moderate proximity to a Candidate Hazard-Based
+    Red Zone. Includes villages within 500m with Lower MH class (Class 1) at
+    centroid, and villages between 500m and 2000m from any class.
+  max_distance_m: 2000.0
+  rationale: >-
+    Within 2000m of a Candidate Hazard Zone. Elevated proximity warrants
+    monitoring and planning context. Does not imply imminent hazard.
+    Settlement extent, drainage patterns, and slope access paths may connect
+    to hazard terrain at this scale.
+
+# ── Tier 3 — Monitoring ───────────────────────────────────────────────────
+# Condition: nearest_hazard_distance_m <= max_distance_m AND NOT Tier 1 or 2
+tier3:
+  label: "Tier3_Monitoring"
+  display_label: "Tier 3 — Monitoring"
+  description: >-
+    Villages within moderate proximity to a Candidate Hazard-Based Red Zone.
+    Within the monitoring proximity band.
+  max_distance_m: 5000.0
+  rationale: >-
+    Within 5000m of a Candidate Hazard Zone. Contextual monitoring proximity
+    band. These villages are not in immediate proximity but are within the
+    broader risk awareness perimeter.
+
+# ── Beyond Proximity — Lower Attention ────────────────────────────────────
+# Condition: nearest_hazard_distance_m > tier3.max_distance_m
+beyond:
+  label: "BeyondProximity"
+  display_label: "Beyond Proximity — Lower Attention"
+  description: >-
+    Villages beyond the monitoring proximity threshold from all Candidate
+    Hazard-Based Red Zones.
+  rationale: >-
+    Greater than 5000m from the nearest Candidate Hazard Zone. Lower proximity
+    context. Does not imply that the location is safe — terrain and other
+    hazard factors not captured by this screening may apply.
+
+# ── Disaster History Integration ──────────────────────────────────────────
+# Status: NOT ACQUIRED — dataset not yet obtained for this project
+disaster_history:
+  status: "NOT_ACQUIRED"
+  note: >-
+    Verified historical disaster event data (NDMA/SDMA Uttarakhand/EM-DAT)
+    has not been acquired for this project. The current tier classification
+    does NOT incorporate disaster history. Per PROJECT_SPEC.md Module 5:
+    disaster history is a required scoring input where verified data exists.
+    When acquired, Tier 1 classification may be further elevated for villages
+    with confirmed historical disaster impact. Re-run the pipeline after
+    supplying verified historical data.
+  required_dataset: "NDMA / SDMA Uttarakhand / EM-DAT"
+  required_format: "CSV with village-level event records and Census village code"
+
+# ── Infrastructure Vulnerability ──────────────────────────────────────────
+infrastructure:
+  status: "NOT_ACQUIRED"
+  note: >-
+    Infrastructure datasets (schools, health centres, roads) have not been
+    acquired. Infrastructure vulnerability cannot be scored. When verified
+    infrastructure data is supplied, this section should be updated.
+
+# ── Output Labels ─────────────────────────────────────────────────────────
+output:
+  priority_disclaimer: >-
+    PRELIMINARY DECISION-SUPPORT PRIORITY — Not an official government
+    relocation priority. Requires field verification, geotechnical assessment,
+    and official administrative review before any relocation action.
+  methodology_note: >-
+    Rule-based classification using verified proximity distance and multi-hazard
+    class at centroid. No AHP weights, MCDA weights, or composite vulnerability
+    scores applied. Vulnerability indicators (literacy, SC/ST, children,
+    non-workers) are included as context fields only — indicator weights have
+    not been verified and are NOT used in tier assignment.
