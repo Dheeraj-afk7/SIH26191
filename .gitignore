@@ -36,16 +36,13 @@ yarn-debug.log*
 yarn-error.log*
 
 # ─── GIS / Large Data ────────────────────────────────────────────────────────
-# Ignore all content inside data/ subdirectories (large binary datasets),
-# but keep README.md files so directory intent is documented in Git.
-# NOTE: Must ignore contents (data/raw/**) not the directory itself (data/raw/)
-# so that the README.md exemption below can work correctly.
+# Ignore raw datasets and large intermediate rasters
 data/raw/**
-data/processed/**
-data/outputs/**
-!data/**/
-!data/**/README.md
-!data/**/.gitkeep
+data/processed/hazards/**
+data/processed/hydrology/**
+data/processed/sites/**
+data/processed/terrain/**
+
 *.tif
 *.tiff
 *.geotiff
@@ -56,13 +53,25 @@ data/outputs/**
 *.prj
 *.cpg
 *.qix
-*.gpkg
 *.gdb/
 *.mbtiles
 *.pbf
 *.nc
 *.hdf
 *.h5
+
+# Keep directory structure & documentation
+!data/**/
+!data/**/README.md
+!data/**/.gitkeep
+
+# Explicitly track API runtime datasets (decision support outputs & candidate layers)
+!data/processed/decision/**
+!data/processed/decision/*.gpkg
+!data/processed/exposure/**
+!data/processed/habitations/**
+!data/outputs/**
+!data/outputs/*.gpkg
 
 # ─── OS & IDE ────────────────────────────────────────────────────────────────
 .DS_Store

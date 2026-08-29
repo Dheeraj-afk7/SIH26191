@@ -1,0 +1,330 @@
+{
+  "project": "SIH26191",
+  "step": "Step 10 \u2014 Decision Engine, Priority & Standardized Outputs",
+  "pilot_district": "Rudraprayag, Uttarakhand, India",
+  "generated_utc": "2026-08-29T06:41:59Z",
+  "methodology_version": "1.0",
+  "classification_method": "rule_based_proximity_class",
+  "village_priority": {
+    "total_habitations": 653,
+    "total_population": 232360,
+    "total_households": 50882,
+    "tier_distribution": {
+      "Tier2_ElevatedAttention": {
+        "display_label": "Tier 2 \u2014 Elevated Attention",
+        "count": 69,
+        "percentage": 10.57,
+        "population": 23012,
+        "households": 4674
+      },
+      "Tier1_AttentionPriority": {
+        "display_label": "Tier 1 \u2014 Attention Priority",
+        "count": 12,
+        "percentage": 1.84,
+        "population": 4750,
+        "households": 977
+      },
+      "Tier3_Monitoring": {
+        "display_label": "Tier 3 \u2014 Monitoring",
+        "count": 204,
+        "percentage": 31.24,
+        "population": 64463,
+        "households": 13978
+      },
+      "BeyondProximity": {
+        "display_label": "Beyond Proximity \u2014 Lower Attention",
+        "count": 368,
+        "percentage": 56.36,
+        "population": 140135,
+        "households": 31253
+      }
+    },
+    "proximity_band_distribution": {
+      "1 km to 2 km": {
+        "count": 51,
+        "population": 17599
+      },
+      "2 km to 5 km": {
+        "count": 204,
+        "population": 64463
+      },
+      "5 km to 10 km": {
+        "count": 255,
+        "population": 93965
+      },
+      "500 m to 1 km": {
+        "count": 16,
+        "population": 4858
+      },
+      "Beyond 10 km": {
+        "count": 113,
+        "population": 46170
+      },
+      "Within 500 m": {
+        "count": 14,
+        "population": 5305
+      }
+    },
+    "mh_class_at_centroid_distribution": {
+      "Class_1": 342,
+      "Class_2": 311,
+      "Class_3": 0,
+      "NoData": 0
+    },
+    "top_attention_priority_villages": [
+      {
+        "village_id": 42573,
+        "village_name": "Marora",
+        "tot_pop": 208,
+        "households": 49,
+        "nearest_hazard_distance_m": 42.5,
+        "nearest_zone_id": "RZ-220",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 42m, nearest: RZ-220) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42067,
+        "village_name": "Tarsali",
+        "tot_pop": 98,
+        "households": 20,
+        "nearest_hazard_distance_m": 178.5,
+        "nearest_zone_id": "RZ-018",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 178m, nearest: RZ-018) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42165,
+        "village_name": "Dungar semala",
+        "tot_pop": 580,
+        "households": 110,
+        "nearest_hazard_distance_m": 310.8,
+        "nearest_zone_id": "RZ-048",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 311m, nearest: RZ-048) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42320,
+        "village_name": "Narkota",
+        "tot_pop": 357,
+        "households": 83,
+        "nearest_hazard_distance_m": 321.5,
+        "nearest_zone_id": "RZ-250",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 322m, nearest: RZ-250) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42129,
+        "village_name": "Gadagu",
+        "tot_pop": 601,
+        "households": 117,
+        "nearest_hazard_distance_m": 330.5,
+        "nearest_zone_id": "RZ-152",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 330m, nearest: RZ-152) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42080,
+        "village_name": "Jaltalla",
+        "tot_pop": 373,
+        "households": 79,
+        "nearest_hazard_distance_m": 349.1,
+        "nearest_zone_id": "RZ-045",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 349m, nearest: RZ-045) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42086,
+        "village_name": "Kabiltha",
+        "tot_pop": 341,
+        "households": 62,
+        "nearest_hazard_distance_m": 349.6,
+        "nearest_zone_id": "RZ-261",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 350m, nearest: RZ-261) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42127,
+        "village_name": "Burua",
+        "tot_pop": 386,
+        "households": 71,
+        "nearest_hazard_distance_m": 410.6,
+        "nearest_zone_id": "RZ-091",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 411m, nearest: RZ-091) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42128,
+        "village_name": "Madali",
+        "tot_pop": 5,
+        "households": 2,
+        "nearest_hazard_distance_m": 425.1,
+        "nearest_zone_id": "RZ-174",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 425m, nearest: RZ-174) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42058,
+        "village_name": "Gaurikund",
+        "tot_pop": 223,
+        "households": 43,
+        "nearest_hazard_distance_m": 468.8,
+        "nearest_zone_id": "RZ-008",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 469m, nearest: RZ-008) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42118,
+        "village_name": "Gaundar",
+        "tot_pop": 294,
+        "households": 45,
+        "nearest_hazard_distance_m": 486.4,
+        "nearest_zone_id": "RZ-145",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 486m, nearest: RZ-145) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      },
+      {
+        "village_id": 42574,
+        "village_name": "Mawana",
+        "tot_pop": 1284,
+        "households": 296,
+        "nearest_hazard_distance_m": 497.6,
+        "nearest_zone_id": "RZ-220",
+        "mh_class_at_centroid": 2.0,
+        "priority_reason": "Centroid within 500m of Candidate Red Zone (distance: 498m, nearest: RZ-220) AND MH Class 2 at centroid (rule: MH Class \u2265 2). Close proximity with moderate-higher hazard terrain at centroid."
+      }
+    ],
+    "vulnerability_indicator_stats": {
+      "illiteracy_rate": {
+        "mean": 0.2962,
+        "median": 0.2946,
+        "min": 0.0,
+        "max": 0.8889,
+        "valid_count": 653
+      },
+      "child_proportion": {
+        "mean": 0.1267,
+        "median": 0.1267,
+        "min": 0.0,
+        "max": 0.375,
+        "valid_count": 653
+      },
+      "sc_proportion": {
+        "mean": 0.1465,
+        "median": 0.0385,
+        "min": 0.0,
+        "max": 1.0,
+        "valid_count": 653
+      },
+      "st_proportion": {
+        "mean": 0.0008,
+        "median": 0.0,
+        "min": 0.0,
+        "max": 0.125,
+        "valid_count": 653
+      },
+      "non_worker_rate": {
+        "mean": 0.5248,
+        "median": 0.517,
+        "min": 0.0,
+        "max": 1.0,
+        "valid_count": 653
+      }
+    },
+    "vulnerability_note": "Vulnerability indicators are CONTEXT FIELDS only. They were NOT used in priority tier assignment. No composite indicator weight has been verified."
+  },
+  "candidate_areas": {
+    "total_features": 5,
+    "total_area_ha": 361307.949280254,
+    "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD",
+    "allocation_status": "NOT_GENERATED \u2014 no allocation methodology",
+    "screening_completeness": "PARTIAL \u2014 6 configurable screening filter(s) NOT_CONFIGURED (slope_max_deg, redzone_buffer_m, flood_class2_exclusion, mh_class2_exclusion, elevation_max_m, minimum_area_m2)",
+    "areas": [
+      {
+        "area_id": "CA-0001",
+        "area_hectares": 361306.7632724814,
+        "mean_slope": 30.8608,
+        "slope_context": "Steep terrain (mean slope >= 30 degrees)",
+        "terrain_context": "Moderate terrain susceptibility indicator (score 0.35-0.65)",
+        "flood_context": "Lower terrain-derived flood exposure (score < 0.35)",
+        "hazard_buffer_context": "Beyond 2km from nearest Candidate Red Zone (3.2km)",
+        "area_scale_context": "VERY_LARGE_UNFILTERED_TERRAIN_SCREEN \u2014 This polygon represents a large contiguous terrain area. Configurable filters (slope threshold, minimum mapping unit) are NOT_CONFIGURED. This is NOT a discrete relocation site recommendation.",
+        "dist_to_nearest_redzone_m": 3250.0,
+        "nearest_village_name": "Lamgondi",
+        "nearest_village_pop": 1175,
+        "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+      },
+      {
+        "area_id": "CA-0002",
+        "area_hectares": 0.9318632498746289,
+        "mean_slope": 1.8145,
+        "slope_context": "Gentle terrain (mean slope < 15 degrees)",
+        "terrain_context": "Lower terrain susceptibility indicator (score < 0.35)",
+        "flood_context": "Moderate terrain-derived flood exposure (score 0.35-0.65)",
+        "hazard_buffer_context": "500m to 2km from nearest Candidate Red Zone",
+        "area_scale_context": "Small terrain cluster (< 10 ha).",
+        "dist_to_nearest_redzone_m": 836.7,
+        "nearest_village_name": "Gaundar",
+        "nearest_village_pop": 294,
+        "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+      },
+      {
+        "area_id": "CA-0003",
+        "area_hectares": 0.08471484089769353,
+        "mean_slope": 1.7902,
+        "slope_context": "Gentle terrain (mean slope < 15 degrees)",
+        "terrain_context": "Lower terrain susceptibility indicator (score < 0.35)",
+        "flood_context": "Lower terrain-derived flood exposure (score < 0.35)",
+        "hazard_buffer_context": "Beyond 2km from nearest Candidate Red Zone (2.3km)",
+        "area_scale_context": "Small terrain cluster (< 10 ha).",
+        "dist_to_nearest_redzone_m": 2339.1,
+        "nearest_village_name": "Garuriya",
+        "nearest_village_pop": 10,
+        "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+      },
+      {
+        "area_id": "CA-0004",
+        "area_hectares": 0.08471484089769353,
+        "mean_slope": 54.6299,
+        "slope_context": "Steep terrain (mean slope >= 30 degrees)",
+        "terrain_context": "Higher terrain susceptibility indicator (score >= 0.65)",
+        "flood_context": "Moderate terrain-derived flood exposure (score 0.35-0.65)",
+        "hazard_buffer_context": "Within 500m of Candidate Red Zone boundary",
+        "area_scale_context": "Small terrain cluster (< 10 ha).",
+        "dist_to_nearest_redzone_m": 14.6,
+        "nearest_village_name": "Gaundar",
+        "nearest_village_pop": 294,
+        "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+      },
+      {
+        "area_id": "CA-0005",
+        "area_hectares": 0.08471484089769353,
+        "mean_slope": 0.0,
+        "slope_context": "Gentle terrain (mean slope < 15 degrees)",
+        "terrain_context": "Lower terrain susceptibility indicator (score < 0.35)",
+        "flood_context": "Moderate terrain-derived flood exposure (score 0.35-0.65)",
+        "hazard_buffer_context": "Beyond 2km from nearest Candidate Red Zone (14.5km)",
+        "area_scale_context": "Small terrain cluster (< 10 ha).",
+        "dist_to_nearest_redzone_m": 14543.1,
+        "nearest_village_name": "Chantikhal",
+        "nearest_village_pop": 30,
+        "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
+      }
+    ]
+  },
+  "missing_datasets": [
+    "disaster_history_ndma_sdma",
+    "road_network",
+    "lulc_land_use_land_cover",
+    "infrastructure_schools_health_centres",
+    "capacity_planning_standard"
+  ],
+  "blocked_features": [
+    "historical_disaster_integration",
+    "infrastructure_vulnerability_scoring",
+    "road_accessibility_scoring",
+    "lulc_exclusion",
+    "capacity_estimate",
+    "village_to_area_allocation"
+  ],
+  "disclaimer": "PRELIMINARY DECISION-SUPPORT PRIORITY \u2014 Not an official government relocation priority. Requires field verification, geotechnical assessment, and official administrative review before any relocation action."
+}

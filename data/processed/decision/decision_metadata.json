@@ -1,0 +1,72 @@
+{
+  "project": "SIH26191",
+  "generated_utc": "2026-08-29T06:41:59Z",
+  "pipeline_step": "Step 10",
+  "inputs_used": {
+    "habitation_exposure": "data/processed/exposure/habitation_exposure.geojson (Step 8)",
+    "pca_census": "data/raw/habitations/PCA_CDB-0503-F-Census.xlsx (Census 2011 PCA)",
+    "multihazard_score": "data/processed/hazards/multihazard_score.tif (Step 6)",
+    "multihazard_classes": "data/processed/hazards/multihazard_classes.tif (Step 6)",
+    "terrain_susceptibility": "data/processed/hazards/terrain_susceptibility_proxy.tif (Step 4)",
+    "flood_exposure": "data/processed/hazards/flood_exposure_proxy.tif (Step 5)",
+    "candidate_areas": "data/outputs/candidate_topographically_feasible_areas_attributed.geojson (Step 9)"
+  },
+  "outputs_produced": {
+    "village_priority_indicators": "data/processed/decision/village_priority_indicators.gpkg",
+    "village_priority_profiles": "data/processed/decision/village_priority_profiles.gpkg",
+    "candidate_area_context": "data/processed/decision/candidate_area_context.gpkg",
+    "decision_summary": "data/processed/decision/decision_summary.json",
+    "decision_metadata": "data/processed/decision/decision_metadata.json",
+    "report": "docs/step10_decision_engine_report.md"
+  },
+  "classification_rules_applied": {
+    "tier1": {
+      "rule": "dist <= 500m AND mh_class >= 2; OR direct_zone_overlap = True",
+      "config_source": "configs/priority_thresholds.yaml",
+      "status": "APPLIED"
+    },
+    "tier2": {
+      "rule": "dist <= 2000m (and not Tier 1)",
+      "config_source": "configs/priority_thresholds.yaml",
+      "status": "APPLIED"
+    },
+    "tier3": {
+      "rule": "dist <= 5000m (and not Tier 1 or 2)",
+      "config_source": "configs/priority_thresholds.yaml",
+      "status": "APPLIED"
+    },
+    "beyond": {
+      "rule": "dist > 5000m",
+      "config_source": "configs/priority_thresholds.yaml",
+      "status": "APPLIED"
+    }
+  },
+  "indicators_used_in_tier": [
+    "nearest_hazard_distance_m",
+    "mh_class_at_centroid",
+    "direct_zone_overlap"
+  ],
+  "indicators_as_context_only": [
+    "illiteracy_rate",
+    "child_proportion",
+    "sc_proportion",
+    "st_proportion",
+    "non_worker_rate",
+    "mh_score_at_centroid",
+    "terrain_score_at_centroid",
+    "flood_score_at_centroid"
+  ],
+  "conditional_inputs_unavailable": {
+    "disaster_history": "NOT_ACQUIRED \u2014 NDMA/SDMA/EM-DAT dataset not obtained",
+    "infrastructure": "NOT_ACQUIRED \u2014 schools/health/roads dataset not obtained",
+    "lulc": "NOT_ACQUIRED \u2014 land use/land cover dataset not obtained",
+    "road_network": "NOT_ACQUIRED",
+    "capacity_standard": "NOT_CONFIGURED \u2014 configs/capacity.yaml has null values"
+  },
+  "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD",
+  "allocation_status": "NOT_GENERATED \u2014 no verified allocation methodology",
+  "crs": "EPSG:32644 (WGS 84 / UTM Zone 44N)",
+  "step9_outputs_modified": false,
+  "step8_outputs_modified": false,
+  "step7_outputs_modified": false
+}

@@ -16,8 +16,9 @@ class Settings(BaseSettings):
     api_version: str = "1.0.0"
     
     # CORS Configuration
-    # Defaults to local dev allowed origins if not specified in environment
+    # Allows Vercel frontend, local dev, and custom domains
     cors_origins: List[str] = [
+        "*",
         "http://localhost:3000",
         "http://localhost:8000",
         "http://127.0.0.1:3000",

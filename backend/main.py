@@ -43,6 +43,25 @@ app.include_router(zones.router, prefix="/api", tags=["Zones"])
 app.include_router(candidate_areas.router, prefix="/api", tags=["Candidate Areas"])
 app.include_router(hazards.router, prefix="/api", tags=["Hazards"])
 
+@app.get("/", tags=["System"])
+def root():
+    return {
+        "status": "healthy",
+        "name": settings.project_name,
+        "version": settings.api_version,
+        "docs_url": "/docs",
+        "openapi_url": "/openapi.json",
+        "endpoints": {
+            "health": "/api/health",
+            "metadata": "/api/metadata",
+            "decision_summary": "/api/decision/summary",
+            "villages": "/api/villages",
+            "red_zones": "/api/red-zones",
+            "candidate_areas": "/api/candidate-areas",
+            "hazards": "/api/hazards"
+        }
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, reload=True)

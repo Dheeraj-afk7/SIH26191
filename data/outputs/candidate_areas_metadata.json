@@ -1,0 +1,55 @@
+{
+  "project": "SIH26191",
+  "step": "Step 9 -- Candidate Topographically Feasible Area Identification",
+  "pilot_district": "Rudraprayag, Uttarakhand, India",
+  "generated_utc": "2026-08-29T06:00:38Z",
+  "methodology_version": "1.0",
+  "crs": "EPSG:32644",
+  "pixel_area_m2": 847.1484,
+  "pipeline_phases": {
+    "9A_exclusion_masks": "completed",
+    "9B_candidate_extraction": "completed",
+    "9C_attribution": "completed"
+  },
+  "applied_parameters": {
+    "exclude_mh_class_3": "APPLIED: 7746 pixels excluded",
+    "exclude_flood_class_3": "APPLIED: 124137 pixels excluded",
+    "exclude_redzone_pixels": "APPLIED: 2634 pixels excluded",
+    "exclude_nodata": "APPLIED: 164415 pixels excluded",
+    "slope_max_deg": "NOT_CONFIGURED",
+    "redzone_buffer_m": "NOT_CONFIGURED",
+    "exclude_flood_class_2": "NOT_CONFIGURED",
+    "exclude_mh_class_2": "NOT_CONFIGURED",
+    "elevation_max_m": "NOT_CONFIGURED",
+    "minimum_area_m2": "NOT_CONFIGURED"
+  },
+  "habitation_demographics": {
+    "status": "AVAILABLE",
+    "message": "DEMOGRAPHIC_ATTRIBUTION_AVAILABLE: Exact code-based Census 2011 PCA join confirmed.",
+    "nearest_village_pop_included": true
+  },
+  "outputs": {
+    "base_features": 5,
+    "base_total_area_ha": 361307.95,
+    "attributed_features": 5,
+    "files": {
+      "exclusion_mask": "data\\processed\\sites\\combined_exclusion_mask.tif",
+      "area_raster": "data\\processed\\sites\\candidate_area_raster.tif",
+      "base_gpkg": "data\\outputs\\candidate_topographically_feasible_areas_base.gpkg",
+      "base_geojson": "data\\outputs\\candidate_topographically_feasible_areas_base.geojson",
+      "attributed_gpkg": "data\\outputs\\candidate_topographically_feasible_areas_attributed.gpkg",
+      "attributed_geojson": "data\\outputs\\candidate_topographically_feasible_areas_attributed.geojson"
+    }
+  },
+  "inputs_used": {
+    "multihazard_classes": "data/processed/hazards/multihazard_classes.tif",
+    "flood_exposure_classes": "data/processed/hazards/flood_exposure_classes.tif",
+    "candidate_redzone_raster": "data/processed/hazards/candidate_redzone_raster.tif",
+    "slope_degrees": "data/processed/terrain/slope_degrees.tif",
+    "multihazard_score": "data/processed/hazards/multihazard_score.tif",
+    "terrain_susceptibility_proxy": "data/processed/hazards/terrain_susceptibility_proxy.tif",
+    "flood_exposure_proxy": "data/processed/hazards/flood_exposure_proxy.tif"
+  },
+  "disclaimer": "Preliminary decision-support candidate requiring field verification. Not an official site authorization or safety certification. Geotechnical and infrastructure assessment required before any relocation action.",
+  "processing_time_seconds": 128.25
+}
