@@ -1,0 +1,155 @@
+{
+  "project": "SIH26191",
+  "pipeline_phase": "Phase 2: Routable Road Network & Mountain Accessibility",
+  "processed_timestamp_utc": "2026-08-30T10:15:56.190564+00:00",
+  "crs": "EPSG:32644",
+  "source_dataset": "OpenStreetMap Contributors (ODbL 1.0)",
+  "network_statistics": {
+    "total_segments": 3914,
+    "total_network_length_km": 6397.35,
+    "vehicular_network_length_km": 4756.84,
+    "arterial_network_length_km": 620.25,
+    "total_graph_nodes": 237401,
+    "total_graph_edges": 238234,
+    "vehicular_graph_nodes": 162477,
+    "vehicular_graph_edges": 162725,
+    "connected_components_count": 27,
+    "largest_connected_component_nodes": 153212,
+    "largest_connected_component_pct": 94.3,
+    "arterial_highway_nodes": 19283
+  },
+  "highway_classes": {
+    "bridleway": {
+      "segments": 49,
+      "length_km": 19.46,
+      "assumed_speed_kmh": 4.0,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "footway": {
+      "segments": 277,
+      "length_km": 110.67,
+      "assumed_speed_kmh": 3.5,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "living_street": {
+      "segments": 2,
+      "length_km": 0.37,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "path": {
+      "segments": 1106,
+      "length_km": 1503.62,
+      "assumed_speed_kmh": 3.5,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "pedestrian": {
+      "segments": 22,
+      "length_km": 2.5,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "primary": {
+      "segments": 28,
+      "length_km": 109.58,
+      "assumed_speed_kmh": 30.0,
+      "is_vehicular": true,
+      "is_arterial": true
+    },
+    "residential": {
+      "segments": 219,
+      "length_km": 98.73,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    },
+    "road": {
+      "segments": 11,
+      "length_km": 3.74,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "secondary": {
+      "segments": 50,
+      "length_km": 134.95,
+      "assumed_speed_kmh": 25.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    },
+    "service": {
+      "segments": 174,
+      "length_km": 102.39,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    },
+    "services": {
+      "segments": 1,
+      "length_km": 0.15,
+      "assumed_speed_kmh": 15.0,
+      "is_vehicular": false,
+      "is_arterial": false
+    },
+    "tertiary": {
+      "segments": 307,
+      "length_km": 927.74,
+      "assumed_speed_kmh": 20.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    },
+    "track": {
+      "segments": 236,
+      "length_km": 338.62,
+      "assumed_speed_kmh": 10.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    },
+    "trunk": {
+      "segments": 285,
+      "length_km": 510.66,
+      "assumed_speed_kmh": 35.0,
+      "is_vehicular": true,
+      "is_arterial": true
+    },
+    "unclassified": {
+      "segments": 1147,
+      "length_km": 2534.16,
+      "assumed_speed_kmh": 18.0,
+      "is_vehicular": true,
+      "is_arterial": false
+    }
+  },
+  "habitation_accessibility_summary": {
+    "total_habitations": 653,
+    "category_distribution": {
+      "MODERATELY_ACCESSIBLE": 249,
+      "REMOTE": 180,
+      "HIGHLY_ACCESSIBLE": 142,
+      "SEVERELY_REMOTE": 71,
+      "ISOLATED_GRAPH_DISCONNECTED": 11
+    },
+    "mean_dist_to_nearest_road_m": 344.1,
+    "mean_travel_time_to_arterial_min": 38.0,
+    "isolated_habitations_count": 82
+  },
+  "candidate_area_accessibility_summary": {
+    "total_candidate_areas": 2998,
+    "category_distribution": {
+      "ISOLATED_GRAPH_DISCONNECTED": 972,
+      "MODERATELY_ACCESSIBLE": 716,
+      "HIGHLY_ACCESSIBLE": 539,
+      "REMOTE": 456,
+      "SEVERELY_REMOTE": 315
+    },
+    "mean_dist_to_nearest_road_m": 809.4,
+    "mean_travel_time_to_arterial_min": 40.8,
+    "isolated_candidates_count": 1287
+  },
+  "planning_assumptions_disclaimer": "ANALYTICAL PLANNING ASSUMPTIONS ONLY. Assumed speeds (trunk: 35 km/h, secondary: 25 km/h, tertiary/PMGSY: 20 km/h, track: 10 km/h) represent realistic mountain travel speed models for rugged Himalayan terrain. OSM highway attributes are preserved without assuming all-weather passability. Actual travel accessibility requires field verification and seasonal landslide monitoring."
+}

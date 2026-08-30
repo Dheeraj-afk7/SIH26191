@@ -2,7 +2,7 @@
   "project": "SIH26191",
   "step": "Step 9 -- Candidate Topographically Feasible Area Identification",
   "pilot_district": "Rudraprayag, Uttarakhand, India",
-  "generated_utc": "2026-08-30T07:09:30Z",
+  "generated_utc": "2026-08-30T09:58:52Z",
   "methodology_version": "1.0",
   "crs": "EPSG:32644",
   "pixel_area_m2": 847.1484,
@@ -21,6 +21,7 @@
     "exclude_flood_class_2": "NOT_CONFIGURED",
     "exclude_mh_class_2": "NOT_CONFIGURED",
     "elevation_max_m": "NOT_CONFIGURED",
+    "exclude_ecological_sensitive_areas": "APPLIED: 3134167 pixels excluded (ESA WorldCover Tree cover/Water + KWLS)",
     "minimum_area_m2": "APPLIED: 10000.0 m2",
     "maximum_area_m2": "APPLIED: 100000.0 m2"
   },
@@ -30,9 +31,9 @@
     "nearest_village_pop_included": true
   },
   "outputs": {
-    "base_features": 5991,
-    "base_total_area_ha": 16342.34,
-    "attributed_features": 5991,
+    "base_features": 2998,
+    "base_total_area_ha": 8095.52,
+    "attributed_features": 2998,
     "files": {
       "exclusion_mask": "data\\processed\\sites\\combined_exclusion_mask.tif",
       "area_raster": "data\\processed\\sites\\candidate_area_raster.tif",
@@ -52,5 +53,5 @@
     "flood_exposure_proxy": "data/processed/hazards/flood_exposure_proxy.tif"
   },
   "disclaimer": "Preliminary decision-support candidate requiring field verification. Not an official site authorization or safety certification. Geotechnical and infrastructure assessment required before any relocation action.",
-  "processing_time_seconds": 133.0
+  "processing_time_seconds": 85.49
 }

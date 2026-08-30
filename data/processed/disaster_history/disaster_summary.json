@@ -1,0 +1,151 @@
+{
+  "project": "SIH26191",
+  "pipeline_phase": "Phase 3: Historical Disaster Ingestion & Multi-Year Landslide Inventory Alignment",
+  "record_classification": "LITERATURE_CURATED_HISTORICAL_RECORD",
+  "acquisition_method": "MANUAL_RESEARCH_AND_CURATED_EXTRACTION",
+  "processed_timestamp_utc": "2026-08-30T10:37:53.484087+00:00",
+  "crs": "EPSG:32644",
+  "total_canonical_events": 22,
+  "total_fatalities_recorded": 6913,
+  "total_households_affected": 3637,
+  "temporal_range": [
+    1998,
+    2024
+  ],
+  "hazard_type_breakdown": {
+    "LANDSLIDE": 10,
+    "CLOUDBURST": 5,
+    "DEBRIS_FLOW": 3,
+    "RIVERINE_FLOOD": 2,
+    "FLASH_FLOOD": 1,
+    "ROCKFALL": 1
+  },
+  "source_access_status_breakdown": {
+    "VERIFIED_PUBLISHED_SECONDARY_SOURCE": 14,
+    "UNVERIFIED_DOCUMENT_REFERENCE": 8
+  },
+  "acquisition_method_breakdown": {
+    "MANUAL_RESEARCH_AND_CURATED_EXTRACTION": 22
+  },
+  "extraction_method_breakdown": {
+    "TEXT_TABULAR_EXTRACTION": 12,
+    "MAP_GEOREFERENCED_DIGITIZATION": 10
+  },
+  "source_native_id_status": {
+    "verified_native_ids_count": 0,
+    "null_unassigned_ids_count": 22
+  },
+  "evidence_level_breakdown": {
+    "PEER_REVIEWED_JOURNAL_ARTICLE": 10,
+    "STATE_EMERGENCY_OPERATIONS_BULLETIN": 7,
+    "OFFICIAL_GOVERNMENT_PDNA_REPORT": 3,
+    "OFFICIAL_DISASTER_LOSS_REGISTRY": 2
+  },
+  "coordinate_uncertainty_breakdown": {
+    "MODERATE_PRECISION (51\u2013100 m)": 11,
+    "VILLAGE_SCALE_PRECISION (101\u2013200 m)": 6,
+    "HIGH_PRECISION (\u2264 50 m)": 3,
+    "CORRIDOR_SCALE_PRECISION (> 200 m)": 2
+  },
+  "source_provider_breakdown": {
+    "Elsevier / Geomorphology": 3,
+    "Public Disaster News & Incident Summary": 3,
+    "Indian Academy of Sciences / Current Science": 2,
+    "Geological Society of India": 2,
+    "District Administration Public Disaster Compilation": 1,
+    "Uttarakhand DMMC / Public Disaster Compilation": 1,
+    "Elsevier / Geomorphology & NIDM + NIDM / Ministry of Home Affairs & USDMA": 1,
+    "District Administration Public Disaster Compilation + Springer / Natural Hazards & GSI": 1,
+    "Indian Academy of Sciences / Current Science + Indian Academy of Sciences / Current Science & DEOC": 1,
+    "Public Highway Incident Report": 1,
+    "Springer / Natural Hazards": 1,
+    "Public Highway Advisory & Incident Report": 1,
+    "Public Disaster News & Local Summary": 1,
+    "Geological Survey of India & Media Reports": 1,
+    "District Administration Public Bulletins & SDRF + Geological Survey of India & SDRF Public Bulletins": 1,
+    "SDRF Public Bulletins & National Media": 1
+  },
+  "annual_event_distribution": {
+    "1998": 2,
+    "2001": 1,
+    "2005": 1,
+    "2010": 1,
+    "2012": 1,
+    "2013": 6,
+    "2016": 1,
+    "2017": 1,
+    "2018": 1,
+    "2019": 1,
+    "2020": 1,
+    "2021": 2,
+    "2022": 1,
+    "2023": 1,
+    "2024": 1
+  },
+  "deduplication_summary": {
+    "raw_records_ingested": 26,
+    "duplicate_pairs_merged": 4,
+    "canonical_events_retained": 22,
+    "dedup_log": [
+      {
+        "canonical_location": "Madhyamaheshwar Valley (Mansuna)",
+        "merged_records": [
+          {
+            "source_provider": "District Administration Public Disaster Compilation",
+            "source_document_title": "District Administration Incident Archive & Public Disaster Loss Summaries",
+            "spatial_offset_m": 62.5,
+            "temporal_offset_days": 1
+          }
+        ]
+      },
+      {
+        "canonical_location": "Chunni - Mangoli (Okhimath)",
+        "merged_records": [
+          {
+            "source_provider": "Indian Academy of Sciences / Current Science & DEOC",
+            "source_document_title": "Geomorphological and hydrological impact of 13 September 2012 cloudburst in Okhimath & USDMA Summary",
+            "spatial_offset_m": 73.3,
+            "temporal_offset_days": 1
+          }
+        ]
+      },
+      {
+        "canonical_location": "Chorabari Lake / Upper Kedarnath",
+        "merged_records": [
+          {
+            "source_provider": "NIDM / Ministry of Home Affairs & USDMA",
+            "source_document_title": "Uttarakhand Disaster 2013: Post Disaster Needs Assessment Report & NDMA Annual Report 2013",
+            "spatial_offset_m": 24.2,
+            "temporal_offset_days": 0
+          }
+        ]
+      },
+      {
+        "canonical_location": "Gaurikund Bridge / Market Parking",
+        "merged_records": [
+          {
+            "source_provider": "District Administration Public Bulletins & SDRF",
+            "source_document_title": "District Administration Incident Briefs & SDRF Search Summaries (August 2023)",
+            "spatial_offset_m": 73.3,
+            "temporal_offset_days": 0
+          }
+        ]
+      }
+    ]
+  },
+  "habitation_exposure_summary": {
+    "total_habitations": 653,
+    "habitations_within_1km_count": 33,
+    "habitations_within_2km_count": 129,
+    "chronic_exposure_habitations_count": 26,
+    "mean_dist_to_nearest_disaster_m": 5900.0
+  },
+  "candidate_area_exposure_summary": {
+    "total_candidate_areas": 2998,
+    "candidates_within_1km_count": 89,
+    "candidates_within_2km_count": 267,
+    "chronic_exposure_candidates_count": 48,
+    "mean_dist_to_nearest_disaster_m": 10283.9
+  },
+  "methodological_disclaimer": "CONTEXTUAL DISASTER HISTORY INFORMATION ONLY. Historical event counts and 1km/2km buffers are analytical exposure perimeters to provide situational context for planners. They do not alter the core deterministic hazard classification rules without official administrative review."
+}

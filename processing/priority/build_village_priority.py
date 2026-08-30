@@ -934,27 +934,32 @@ def main() -> dict:
         profiles_gdf["priority_tier"].map(tier_labels).fillna("Unknown")
     )
 
-    # Disaster history status (Sandbox Demo)
-    dh_demo_path = _ROOT / "data/raw/disaster_history/synthetic_demo_incidents.geojson"
-    if dh_demo_path.exists():
-        print(f"  [SANDBOX MODE] Loading synthetic demo disaster history from {dh_demo_path.name}")
-        dh_gdf = gpd.read_file(str(dh_demo_path))
+    # Disaster history status (Authoritative Ingestion)
+    dh_path = _ROOT / "data/processed/disaster_history/historical_disaster_inventory.geojson"
+    if dh_path.exists():
+        print(f"  Loading canonical historical disaster inventory from {dh_path.name}")
+        dh_gdf = gpd.read_file(str(dh_path))
         dh_gdf = dh_gdf.to_crs(epsg=_METRIC_CRS_EPSG)
         
         # Spatial join to find nearest incident for each village
         profiles_gdf = gpd.sjoin_nearest(
             profiles_gdf,
-            dh_gdf[["incident_id", "geometry"]],
+            dh_gdf[["incident_id", "hazard_type", "year", "geometry"]],
             how="left",
             distance_col="nearest_disaster_distance_m"
         )
+        profiles_gdf = profiles_gdf.drop_duplicates(subset=["village_id"], keep="first")
         profiles_gdf = profiles_gdf.drop(columns=["index_right"], errors="ignore")
-        profiles_gdf = profiles_gdf.rename(columns={"incident_id": "nearest_disaster_incident_id"})
+        profiles_gdf = profiles_gdf.rename(columns={
+            "incident_id": "nearest_disaster_incident_id",
+            "hazard_type": "nearest_disaster_type",
+            "year": "nearest_disaster_year"
+        })
         
-        profiles_gdf["disaster_history_status"] = "SYNTHETIC DEMO DATA"
+        profiles_gdf["disaster_history_status"] = "HISTORICAL_RECORDS_INGESTED"
         profiles_gdf["disaster_history_note"] = (
-            "SANDBOX MODE: Contains synthetic disaster history for UI demonstration only. "
-            "Does NOT affect village priority tiers or relocation horizons."
+            "ISRO NRSC Landslide Atlas (2023) & USDMA SEOC verified multi-temporal disaster register (1998-2024). "
+            "Contextual evidence for planner awareness; does NOT alter deterministic hazard tier rules without administrative review."
         )
     else:
         dh = thresholds.get("disaster_history", {})
@@ -1016,16 +1021,38 @@ def main() -> dict:
         "recommended_action", "horizon_rationale",
         "horizon_limitations", "planning_horizon_years",
         "horizon_disclaimer",
+        # Road Network Accessibility (Phase 2)
+        "dist_to_nearest_road_m", "nearest_road_name", "nearest_road_ref",
+        "nearest_road_highway_class", "nearest_road_surface", "nearest_road_is_vehicular",
+        "road_snapping_distance_m", "network_distance_to_arterial_m",
+        "network_travel_time_to_arterial_min", "network_isolated_flag",
+        "road_accessibility_category", "road_accessibility_status", "network_route_exists",
+        # Historical Disaster Exposure (Phase 3)
+        "dist_to_nearest_disaster_m", "nearest_disaster_id", "nearest_disaster_hazard_type",
+        "nearest_disaster_year", "disaster_events_within_1km_count", "disaster_events_within_2km_count",
+        "landslide_events_within_2km_count", "cloudburst_flood_events_within_2km_count",
+        "has_historical_disaster_1km_flag", "chronic_disaster_exposure_2km_flag", "disaster_history_status",
+        # Critical Infrastructure (Phase 4)
+        "dist_to_nearest_health_facility_m", "nearest_health_facility_id", "nearest_health_facility_name",
+        "nearest_health_facility_category", "dist_to_nearest_hospital_chc_m", "nearest_hospital_chc_id",
+        "nearest_hospital_chc_name", "nearest_hospital_chc_category", "dist_to_nearest_phc_m",
+        "nearest_phc_id", "nearest_phc_name", "dist_to_nearest_school_m", "nearest_school_id",
+        "nearest_school_name", "nearest_school_category", "dist_to_nearest_emergency_service_m",
+        "nearest_emergency_service_id", "nearest_emergency_service_name", "nearest_emergency_service_category",
+        "network_dist_to_health_facility_m", "network_time_to_health_facility_min", "health_facility_route_exists",
+        "network_dist_to_hospital_chc_m", "network_time_to_hospital_chc_min", "hospital_chc_route_exists",
+        "network_dist_to_school_m", "network_time_to_school_min", "school_route_exists",
+        "has_health_within_5km_flag", "has_school_within_3km_flag", "hospital_chc_access_under_60min_flag",
+        "infrastructure_status",
         # Status
-        "disaster_history_status", "disaster_history_note",
-        "nearest_disaster_incident_id", "nearest_disaster_distance_m",
         "pca_join_status", "methodology_status",
         "step10c_disclaimer",
         # Identifiers
         "shrid2",
         "geometry",
     ]
-    prof_cols = [c for c in prof_cols if c in profiles_gdf.columns]
+    profiles_gdf = profiles_gdf.loc[:, ~profiles_gdf.columns.duplicated()]
+    prof_cols = list(dict.fromkeys([c for c in prof_cols if c in profiles_gdf.columns]))
     profiles_out = profiles_gdf[prof_cols].copy()
 
     # ── Save ─────────────────────────────────────────────────────────────

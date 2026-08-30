@@ -1,0 +1,113 @@
+{
+  "project": "SIH26191",
+  "pilot_district": "Rudraprayag, Uttarakhand, India",
+  "processed_timestamp_utc": "2026-08-30T09:56:57.192495+00:00",
+  "crs": "EPSG:32644 (UTM Zone 44N)",
+  "grid_resolution_m": 29.1058,
+  "source_dataset": "ESA WorldCover 10m 2021 v200 (Tile N30E078)",
+  "protected_area_layer_status": "PENDING_AUTHORITATIVE_CADASTRE_RELEASE",
+  "protected_area_intended_target": "Kedarnath Wildlife Sanctuary (WDPA ID 832, 975 km2)",
+  "protected_area_status_note": "UNEP-WCMC WDPCA India feature 902492 (Nanda Devi) excluded from substitution to preserve strict geographic identity. Statutory sanctuary boundary remains a pending cadastre layer until official UKFD release.",
+  "total_district_area_ha": 372128.32,
+  "ecological_exclusion_ha": 265510.46,
+  "ecological_exclusion_pct": 71.35,
+  "ecological_permissible_ha": 106617.86,
+  "ecological_permissible_pct": 28.65,
+  "classes": {
+    "10": {
+      "code": 10,
+      "label": "Tree cover",
+      "pixel_count": 2572609,
+      "area_hectares": 217938.16,
+      "percentage_of_district": 58.57,
+      "screening_policy": "EXCLUDED"
+    },
+    "20": {
+      "code": 20,
+      "label": "Shrubland",
+      "pixel_count": 1,
+      "area_hectares": 0.08,
+      "percentage_of_district": 0.0,
+      "screening_policy": "PERMISSIBLE"
+    },
+    "30": {
+      "code": 30,
+      "label": "Grassland",
+      "pixel_count": 873555,
+      "area_hectares": 74003.07,
+      "percentage_of_district": 19.89,
+      "screening_policy": "PERMISSIBLE"
+    },
+    "40": {
+      "code": 40,
+      "label": "Cropland",
+      "pixel_count": 30188,
+      "area_hectares": 2557.37,
+      "percentage_of_district": 0.69,
+      "screening_policy": "PERMISSIBLE"
+    },
+    "50": {
+      "code": 50,
+      "label": "Built-up",
+      "pixel_count": 20142,
+      "area_hectares": 1706.33,
+      "percentage_of_district": 0.46,
+      "screening_policy": "EXCLUDED"
+    },
+    "60": {
+      "code": 60,
+      "label": "Bare / sparse vegetation",
+      "pixel_count": 139899,
+      "area_hectares": 11851.52,
+      "percentage_of_district": 3.18,
+      "screening_policy": "PERMISSIBLE"
+    },
+    "70": {
+      "code": 70,
+      "label": "Snow and ice",
+      "pixel_count": 524075,
+      "area_hectares": 44396.93,
+      "percentage_of_district": 11.93,
+      "screening_policy": "EXCLUDED"
+    },
+    "80": {
+      "code": 80,
+      "label": "Permanent water bodies",
+      "pixel_count": 17341,
+      "area_hectares": 1469.04,
+      "percentage_of_district": 0.39,
+      "screening_policy": "EXCLUDED"
+    },
+    "90": {
+      "code": 90,
+      "label": "Herbaceous wetland",
+      "pixel_count": 0,
+      "area_hectares": 0.0,
+      "percentage_of_district": 0.0,
+      "screening_policy": "EXCLUDED"
+    },
+    "95": {
+      "code": 95,
+      "label": "Mangroves",
+      "pixel_count": 0,
+      "area_hectares": 0.0,
+      "percentage_of_district": 0.0,
+      "screening_policy": "PERMISSIBLE"
+    },
+    "100": {
+      "code": 100,
+      "label": "Moss and lichen",
+      "pixel_count": 214907,
+      "area_hectares": 18205.81,
+      "percentage_of_district": 4.89,
+      "screening_policy": "PERMISSIBLE"
+    }
+  },
+  "exclusion_breakdown": {
+    "tree_cover_ha": 217938.16,
+    "built_up_ha": 1706.33,
+    "snow_ice_ha": 44396.93,
+    "water_bodies_ha": 1469.04,
+    "sanctuary_ha": 0.0
+  }
+}

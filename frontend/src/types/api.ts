@@ -198,6 +198,64 @@ export interface VillageProperties {
   nearest_disaster_distance_m?: number;
   methodology_status?: string;
   step10c_disclaimer?: string;
+  // Road Network Accessibility (Phase 2)
+  dist_to_nearest_road_m?: number;
+  nearest_road_name?: string;
+  nearest_road_ref?: string;
+  nearest_road_highway_class?: string;
+  nearest_road_surface?: string;
+  nearest_road_is_vehicular?: boolean;
+  road_snapping_distance_m?: number;
+  network_distance_to_arterial_m?: number;
+  network_travel_time_to_arterial_min?: number;
+  network_isolated_flag?: boolean;
+  road_accessibility_category?: string;
+  road_accessibility_status?: string;
+  network_route_exists?: boolean;
+  // Historical Disaster Exposure (Phase 3)
+  dist_to_nearest_disaster_m?: number;
+  nearest_disaster_id?: string;
+  nearest_disaster_hazard_type?: string;
+  nearest_disaster_year?: number;
+  disaster_events_within_1km_count?: number;
+  disaster_events_within_2km_count?: number;
+  landslide_events_within_2km_count?: number;
+  cloudburst_flood_events_within_2km_count?: number;
+  has_historical_disaster_1km_flag?: boolean;
+  chronic_disaster_exposure_2km_flag?: boolean;
+  // Critical Infrastructure (Phase 4)
+  dist_to_nearest_health_facility_m?: number;
+  nearest_health_facility_id?: string;
+  nearest_health_facility_name?: string;
+  nearest_health_facility_category?: string;
+  dist_to_nearest_hospital_chc_m?: number;
+  nearest_hospital_chc_id?: string;
+  nearest_hospital_chc_name?: string;
+  nearest_hospital_chc_category?: string;
+  dist_to_nearest_phc_m?: number;
+  nearest_phc_id?: string;
+  nearest_phc_name?: string;
+  dist_to_nearest_school_m?: number;
+  nearest_school_id?: string;
+  nearest_school_name?: string;
+  nearest_school_category?: string;
+  dist_to_nearest_emergency_service_m?: number;
+  nearest_emergency_service_id?: string;
+  nearest_emergency_service_name?: string;
+  nearest_emergency_service_category?: string;
+  network_dist_to_health_facility_m?: number;
+  network_time_to_health_facility_min?: number;
+  health_facility_route_exists?: boolean;
+  network_dist_to_hospital_chc_m?: number;
+  network_time_to_hospital_chc_min?: number;
+  hospital_chc_route_exists?: boolean;
+  network_dist_to_school_m?: number;
+  network_time_to_school_min?: number;
+  school_route_exists?: boolean;
+  has_health_within_5km_flag?: boolean;
+  has_school_within_3km_flag?: boolean;
+  hospital_chc_access_under_60min_flag?: boolean;
+  infrastructure_status?: string;
 }
 
 export interface GeoJsonPoint {

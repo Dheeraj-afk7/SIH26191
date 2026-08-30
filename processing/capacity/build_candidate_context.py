@@ -498,14 +498,18 @@ def main() -> dict:
     print("  allocation_status: NOT_ALLOCATED (no verified methodology)")
 
     # Infrastructure and access notes
-    areas_gdf["road_accessibility_status"] = (
-        "NOT_ASSESSED — Road network dataset not acquired. "
-        "Area accessibility by road cannot be determined from current data."
-    )
-    areas_gdf["lulc_status"] = (
-        "NOT_ASSESSED — Land use / land cover dataset not acquired. "
-        "Forest, agricultural, or protected area status cannot be determined."
-    )
+    if "road_accessibility_status" not in areas_gdf.columns or areas_gdf["road_accessibility_status"].isnull().all():
+        areas_gdf["road_accessibility_status"] = (
+            "NOT_ASSESSED — Road network dataset not acquired. "
+            "Area accessibility by road cannot be determined from current data."
+        )
+    if "dominant_land_cover" in areas_gdf.columns:
+        areas_gdf["lulc_status"] = "ESA_WORLDCOVER_EVALUATED — Screened against Tree cover, Snow/Ice, Water Bodies, and Built-up"
+    else:
+        areas_gdf["lulc_status"] = (
+            "NOT_ASSESSED — Land use / land cover dataset not acquired. "
+            "Forest, agricultural, or protected area status cannot be determined."
+        )
 
     # Step 10 disclaimer
     areas_gdf["step10_disclaimer"] = _DISCLAIMER

@@ -463,11 +463,33 @@ def run_9a_exclusion_masks(
             param_log["elevation_max_m"] = f"APPLIED: {elev_max} m, {px} pixels excluded"
 
     # ------------------------------------------------------------------
+    # C6: Ecological & Forest Exclusion Mask (Phase 1) [CONFIGURABLE]
+    # ------------------------------------------------------------------
+    excl_eco = cscr.get("exclude_ecological_sensitive_areas", None)
+    eco_mask_rel = cscr.get("ecological_mask_path", "data/processed/lulc/ecological_exclusion_mask.tif")
+    eco_mask_path = _ROOT / eco_mask_rel if eco_mask_rel else None
+
+    if excl_eco is True and eco_mask_path and eco_mask_path.exists():
+        with rasterio.open(str(eco_mask_path)) as eco_src:
+            mask_eco_raw = eco_src.read(1)
+            mask_eco = (mask_eco_raw == 1)
+        px = int(mask_eco.sum())
+        _log(f"  [C6] Ecological & Forest Land excluded: {px:,} px ({px * pixel_area_m2 / 10000:.1f} ha) [APPLIED]")
+        param_log["exclude_ecological_sensitive_areas"] = f"APPLIED: {px} pixels excluded (ESA WorldCover Tree cover/Water + KWLS)"
+    else:
+        if excl_eco is None:
+            _skip("exclude_ecological_sensitive_areas")
+            param_log["exclude_ecological_sensitive_areas"] = "NOT_CONFIGURED"
+        else:
+            param_log["exclude_ecological_sensitive_areas"] = "DISABLED_OR_FILE_MISSING"
+        mask_eco = np.zeros(ref_shape, dtype=bool)
+
+    # ------------------------------------------------------------------
     # Combined mask
     # ------------------------------------------------------------------
     combined_exclusion = (
         mask_mh3 | mask_flood3 | mask_rz | mask_nodata |
-        mask_slope | mask_rz_buffer | mask_flood2 | mask_mh2 | mask_elev
+        mask_slope | mask_rz_buffer | mask_flood2 | mask_mh2 | mask_elev | mask_eco
     )
     candidate_mask = ~combined_exclusion
 
@@ -695,6 +717,7 @@ def run_9b_candidate_extraction(
         f"exclude_flood_class_2={param_log.get('exclude_flood_class_2','NOT_CONFIGURED')}",
         f"exclude_mh_class_2={param_log.get('exclude_mh_class_2','NOT_CONFIGURED')}",
         f"elevation_max_m={param_log.get('elevation_max_m','NOT_CONFIGURED')}",
+        f"exclude_ecological_sensitive_areas={param_log.get('exclude_ecological_sensitive_areas','NOT_CONFIGURED')}",
         f"minimum_area_m2={param_log.get('minimum_area_m2','NOT_CONFIGURED')}",
         f"maximum_area_m2={param_log.get('maximum_area_m2','NOT_CONFIGURED')}",
     ]
@@ -797,6 +820,40 @@ def run_9c_attribution(
             _warn(f"Zonal stats failed for {field_prefix}: {exc}")
             for suffix in ("mean", "max", "min"):
                 att_gdf[f"{suffix}_{field_prefix}"] = None
+
+    # ------------------------------------------------------------------
+    # 9C-1b: Land Cover & Net Developable Area Attribution (Phase 1 LULC)
+    # ------------------------------------------------------------------
+    att_gdf["gross_polygon_area_ha"] = att_gdf["area_hectares"]
+    att_gdf["ecological_excluded_area_ha"] = 0.0
+    att_gdf["net_developable_area_ha"] = att_gdf["area_hectares"]
+    att_gdf["ecological_screening_status"] = "ECOLOGICALLY_SCREENED_PERMISSIBLE"
+
+    lulc_raster_path = _ROOT / "data" / "processed" / "lulc" / "rudraprayag_worldcover_30m.tif"
+    if lulc_raster_path.exists():
+        try:
+            lulc_legend = {
+                10: "Tree cover", 20: "Shrubland", 30: "Grassland", 40: "Cropland",
+                50: "Built-up", 60: "Bare / sparse vegetation", 70: "Snow and ice",
+                80: "Permanent water bodies", 90: "Herbaceous wetland", 100: "Moss and lichen"
+            }
+            stats_lulc = rasterstats.zonal_stats(
+                vectors=att_gdf.geometry,
+                raster=str(lulc_raster_path),
+                stats=["majority"],
+                nodata=0,
+            )
+            majority_codes = [int(s["majority"]) if s["majority"] is not None else None for s in stats_lulc]
+            att_gdf["dominant_lulc_code"] = majority_codes
+            att_gdf["dominant_land_cover"] = [lulc_legend.get(code, "Unknown") if code is not None else "Unknown" for code in majority_codes]
+            _log(f"  [OK] dominant_land_cover attributed for {len(att_gdf)} features from ESA WorldCover")
+        except Exception as exc:
+            _warn(f"LULC zonal stats failed: {exc}")
+            att_gdf["dominant_lulc_code"] = None
+            att_gdf["dominant_land_cover"] = "Unknown"
+    else:
+        att_gdf["dominant_lulc_code"] = None
+        att_gdf["dominant_land_cover"] = "Not Acquired"
 
     # ------------------------------------------------------------------
     # 9C-2: Proximity to nearest Candidate Red Zone

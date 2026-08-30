@@ -302,6 +302,38 @@ def main() -> None:
             _check("attributed_gpkg.feature_count_matches_base", PASS,
                    f"{len(att_gdf)} features in both")
 
+        # ------------------------------------------------------------------
+        # 4b. Explicit LULC Exclusion & Gross/Net Developable Area Check
+        # ------------------------------------------------------------------
+        _section("4b. LULC PER-CLASS EXCLUSION & GROSS/NET AREA CHECK")
+
+        # Check gross vs net area fields
+        if "gross_polygon_area_ha" in att_gdf.columns and "net_developable_area_ha" in att_gdf.columns:
+            diff_sum = (att_gdf["gross_polygon_area_ha"] - att_gdf["net_developable_area_ha"]).abs().sum()
+            _check("attributed_gpkg.gross_vs_net_developable_area", PASS if diff_sum == 0 else WARN,
+                   f"gross_polygon_area_ha == net_developable_area_ha (diff_sum={diff_sum:.2f})")
+
+        # Check dominant_land_cover values
+        if "dominant_land_cover" in att_gdf.columns:
+            excl_classes_found = att_gdf[att_gdf["dominant_land_cover"].isin([
+                "Tree cover", "Built-up", "Snow and ice", "Permanent water bodies", "Herbaceous wetland"
+            ])]
+            tree_count = int((att_gdf["dominant_land_cover"] == "Tree cover").sum())
+            built_count = int((att_gdf["dominant_land_cover"] == "Built-up").sum())
+            snow_count = int((att_gdf["dominant_land_cover"] == "Snow and ice").sum())
+            water_count = int((att_gdf["dominant_land_cover"] == "Permanent water bodies").sum())
+
+            _check("attributed_gpkg.exclusion.tree_cover", PASS if tree_count == 0 else FAIL,
+                   f"0 candidate polygons with Tree Cover (found: {tree_count})")
+            _check("attributed_gpkg.exclusion.built_up", PASS if built_count == 0 else FAIL,
+                   f"0 candidate polygons with Built-up (found: {built_count})")
+            _check("attributed_gpkg.exclusion.snow_ice", PASS if snow_count == 0 else FAIL,
+                   f"0 candidate polygons with Snow/Ice (found: {snow_count})")
+            _check("attributed_gpkg.exclusion.permanent_water", PASS if water_count == 0 else FAIL,
+                   f"0 candidate polygons with Permanent Water (found: {water_count})")
+        else:
+            _check("attributed_gpkg.dominant_land_cover", WARN, "dominant_land_cover column not found")
+
     except Exception as exc:
         _check("attributed_gpkg.read", FAIL, str(exc))
 

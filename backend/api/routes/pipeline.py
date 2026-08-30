@@ -1,28 +1,13 @@
 #!/usr/bin/env python3
 """
-SIH26191 -- Phase A: Dynamic Pipeline Recompute API
-=====================================================
+SIH26191 -- Dynamic Pipeline Recompute API
+==========================================
 
 Provides a POST /api/pipeline/recompute endpoint that triggers
-an operator-initiated pipeline recomputation.
+an operator-initiated pipeline recomputation across all pipeline modules.
 
 LABEL: Operator-Triggered Recompute Workflow
-NOT: Autonomous real-time monitoring
-
-This endpoint demonstrates the "dynamically identify and update"
-PS requirement via an operator-initiated workflow. When new data
-is available or thresholds are changed, an authorized operator
-can trigger recomputation of the classification pipeline.
-
-USAGE:
-    POST /api/pipeline/recompute
-    Body: {"steps": ["priority"], "operator_note": "threshold update"}
-
-RESPONSE:
-    {"job_id": "...", "status": "RUNNING", "estimated_seconds": 30}
-
-Then poll:
-    GET /api/pipeline/status/{job_id}
+Dynamically refreshes active in-memory datasets on completion.
 """
 
 import uuid
@@ -35,13 +20,11 @@ import logging
 from typing import Optional, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from backend.services.data_loader import data_store
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# ---------------------------------------------------------------------------
-# In-memory job store (simple -- use Redis/DB in production)
-# ---------------------------------------------------------------------------
 _jobs: dict = {}
 _ROOT = pathlib.Path(__file__).resolve().parent.parent.parent.parent
 
@@ -49,26 +32,36 @@ VALID_STEPS = {
     "priority": {
         "script": "processing/priority/build_village_priority.py",
         "label": "Village Priority Classification (Step 10B + 10C)",
-        "estimated_seconds": 30,
+        "estimated_seconds": 5,
     },
     "capacity": {
         "script": "processing/capacity/build_candidate_context.py",
         "label": "Candidate Area Capacity Enrichment (Step 10D)",
+        "estimated_seconds": 5,
+    },
+    "infrastructure": {
+        "script": "processing/infrastructure/ingest_critical_infrastructure.py",
+        "label": "Critical Infrastructure Ingestion & Routing (Phase 4)",
         "estimated_seconds": 10,
+    },
+    "decision_summary": {
+        "script": "processing/priority/generate_decision_summary.py",
+        "label": "Decision Summary & Metadata Generation (Step 10E)",
+        "estimated_seconds": 3,
     },
 }
 
 
 class RecomputeRequest(BaseModel):
-    steps: List[str] = ["priority"]
+    steps: List[str] = ["priority", "capacity", "decision_summary"]
     operator_note: Optional[str] = None
 
 
 def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
-    """Background thread: run requested pipeline steps sequentially."""
+    """Background thread: run requested pipeline steps sequentially and reload data_store."""
     job = _jobs[job_id]
     job["status"] = "RUNNING"
-    job["started_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+    job["started_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     results = []
     all_ok = True
@@ -92,10 +85,10 @@ def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
                 cwd=str(_ROOT),
                 capture_output=True,
                 text=True,
-                timeout=300,  # 5 minute timeout per step
+                timeout=300,
             )
             elapsed = round(time.time() - t0, 1)
-            ok = proc.returncode == 0 or (proc.returncode == 1 and "DeprecationWarning" in proc.stderr)
+            ok = proc.returncode == 0
             results.append({
                 "step": step,
                 "label": step_cfg["label"],
@@ -124,13 +117,20 @@ def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
             })
             all_ok = False
 
+    # Dynamically reload active in-memory datasets
+    try:
+        logger.info("Pipeline recompute finished. Dynamically reloading in-memory data_store...")
+        data_store.load_all()
+        reload_status = "SUCCESS"
+    except Exception as e:
+        logger.error(f"Failed to reload data_store: {e}")
+        reload_status = f"FAILED: {e}"
+
     job["status"] = "COMPLETE" if all_ok else "PARTIAL_FAILURE"
-    job["completed_at"] = datetime.datetime.utcnow().isoformat() + "Z"
+    job["completed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     job["step_results"] = results
-    job["note"] = (
-        "Pipeline recomputation complete. Restart the backend server to serve "
-        "updated data, or the data_loader will reload on next startup."
-    )
+    job["data_store_reload"] = reload_status
+    job["note"] = "Pipeline recomputation complete and in-memory datasets dynamically refreshed."
     if operator_note:
         job["operator_note"] = operator_note
 
@@ -141,15 +141,7 @@ def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
 def trigger_recompute(request: RecomputeRequest):
     """
     Trigger an operator-initiated pipeline recompute.
-
-    LABEL: Operator-Triggered Recompute Workflow
-    This demonstrates dynamic update capability. Recomputation reflects
-    any threshold changes made to configs/priority_thresholds.yaml or
-    configs/project.yaml since the last run.
-
-    Returns a job ID for status polling.
     """
-    # Validate steps
     unknown = [s for s in request.steps if s not in VALID_STEPS]
     if unknown:
         raise HTTPException(
@@ -167,15 +159,14 @@ def trigger_recompute(request: RecomputeRequest):
         "status": "QUEUED",
         "steps": request.steps,
         "operator_note": request.operator_note,
-        "queued_at": datetime.datetime.utcnow().isoformat() + "Z",
+        "queued_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "started_at": None,
         "completed_at": None,
         "estimated_seconds": estimated,
         "step_results": [],
         "disclaimer": (
             "Operator-Triggered Recompute Workflow -- Not autonomous real-time monitoring. "
-            "Results reflect configured thresholds in configs/priority_thresholds.yaml. "
-            "Restart backend to serve updated data to frontend."
+            "Results reflect configured thresholds in configs/priority_thresholds.yaml."
         ),
     }
 
@@ -217,5 +208,5 @@ def list_pipeline_steps():
             }
             for k, v in VALID_STEPS.items()
         ],
-        "usage": "POST /api/pipeline/recompute with {\"steps\": [\"priority\", \"capacity\"]}",
+        "usage": "POST /api/pipeline/recompute with {\"steps\": [\"priority\", \"capacity\", \"infrastructure\"]}",
     }

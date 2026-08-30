@@ -70,8 +70,15 @@ data/processed/terrain/**
 !data/processed/decision/*.gpkg
 !data/processed/exposure/**
 !data/processed/habitations/**
+!data/processed/infrastructure/**
+!data/processed/disaster_history/**
+!data/processed/roads/**
+!data/processed/lulc/**
 !data/outputs/**
 !data/outputs/*.gpkg
+!data/raw/roads/provenance_metadata.json
+!data/raw/disaster_history/provenance_metadata.json
+!data/raw/disaster_history/*.json
 
 # ─── OS & IDE ────────────────────────────────────────────────────────────────
 .DS_Store

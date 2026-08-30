@@ -1,0 +1,57 @@
+{
+  "project": "SIH26191",
+  "pipeline_phase": "Phase 4: Critical Infrastructure (Health, Education & Emergency Facilities)",
+  "source_provider": "OpenStreetMap Contributors",
+  "source_license": "ODbL 1.0",
+  "acquisition_date": "2026-08-30",
+  "processed_timestamp_utc": "2026-08-30T10:59:12.351752+00:00",
+  "crs": "EPSG:32644",
+  "total_critical_facilities": 291,
+  "emergency_capability_breakdown": {
+    "explicitly_evidenced_emergency_facilities": 4,
+    "potential_emergency_receiving_clinical_facilities": 42,
+    "routine_healthcare_and_civic_facilities": 245
+  },
+  "facility_broad_type_breakdown": {
+    "HEALTHCARE": 187,
+    "EDUCATION": 72,
+    "CIVIC_ADMINISTRATIVE": 28,
+    "EMERGENCY": 4
+  },
+  "facility_category_breakdown": {
+    "HEALTHCARE_SUBCENTRE": 127,
+    "EDUCATION_HIGHER": 33,
+    "HEALTHCARE_HOSPITAL": 24,
+    "CIVIC_GOVERNMENT_OFFICE": 22,
+    "EDUCATION_SCHOOL": 20,
+    "EDUCATION_UNIVERSITY": 19,
+    "HEALTHCARE_CLINIC": 18,
+    "HEALTHCARE_PHC": 12,
+    "HEALTHCARE_CHC": 6,
+    "OTHER_CIVIC_FACILITY": 3,
+    "EMERGENCY_POLICE": 3,
+    "CIVIC_COMMUNITY_CENTRE": 2,
+    "CIVIC_POST_OFFICE": 1,
+    "EMERGENCY_FIRE_STATION": 1
+  },
+  "habitation_accessibility_summary": {
+    "total_habitations": 653,
+    "mean_dist_to_health_facility_m": 1848.9,
+    "mean_dist_to_hospital_chc_m": 4921.6,
+    "mean_dist_to_school_m": 12250.1,
+    "habitations_with_health_under_5km": 646,
+    "habitations_with_school_under_3km": 36,
+    "habitations_with_hospital_chc_under_60min": 315
+  },
+  "candidate_area_accessibility_summary": {
+    "total_candidate_areas": 2998,
+    "mean_dist_to_health_facility_m": 4146.5,
+    "mean_dist_to_hospital_chc_m": 8146.9,
+    "mean_dist_to_school_m": 16315.4,
+    "candidates_with_health_under_5km": 2188,
+    "candidates_with_school_under_3km": 237,
+    "candidates_with_hospital_chc_under_60min": 1200
+  },
+  "education_completeness_statement": "OSM MAPPED EDUCATION INDICATOR ONLY. Mapped schools (N=70) reflect open community-contributed geospatial features. They do not constitute an exhaustive administrative census of all rural primary and upper-primary school institutions across all 653 revenue villages.",
+  "methodological_safeguard": "CRITICAL INFRASTRUCTURE ACCESSIBILITY METRICS ARE CONTEXTUAL LIFELINE INDICATORS ONLY. They quantify isolation from healthcare and educational services to assist planners in evaluating community vulnerability. They do not alter the deterministic core priority classification engine."
+}

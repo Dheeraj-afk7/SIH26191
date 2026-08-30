@@ -1,0 +1,39 @@
+{
+  "dataset_name": "OpenStreetMap Road Network (Rudraprayag BBox)",
+  "source": "OpenStreetMap Contributors via Overpass API",
+  "source_mirror": "https://overpass-api.de/api/interpreter",
+  "query": "[out:json][timeout:120];\n(\n  way[\"highway\"](30.10,78.70,30.90,79.50);\n);\nout body geom;",
+  "acquisition_timestamp_utc": "2026-08-30T10:14:58.943525+00:00",
+  "license": "Open Database License (ODbL) 1.0",
+  "attribution": "\u00a9 OpenStreetMap contributors",
+  "raw_json_file": "osm_roads_rudraprayag_raw.json",
+  "geojson_file": "osm_roads_rudraprayag.geojson",
+  "file_size_bytes": 7707016,
+  "sha256_hash": "78e2b84c1f598d7eb582b28318693e8ed2f68ae5ce9b07c68d6fd14390a513e3",
+  "feature_count": 3923,
+  "source_crs": "EPSG:4326 (WGS84)",
+  "bounding_box": [
+    78.7,
+    30.1,
+    79.5,
+    30.9
+  ],
+  "original_attributes_preserved": [
+    "osm_id",
+    "highway",
+    "name",
+    "name_en",
+    "ref",
+    "surface",
+    "maxspeed",
+    "oneway",
+    "access",
+    "motor_vehicle",
+    "bridge",
+    "tunnel",
+    "smoothness",
+    "tracktype",
+    "lanes",
+    "layer"
+  ]
+}

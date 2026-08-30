@@ -1,0 +1,29 @@
+{
+  "project_id": "SIH26191",
+  "dataset_name": "Historical Disaster Incident Inventory & Multi-Year Hazard Events",
+  "pilot_district": "Rudraprayag, Uttarakhand, India",
+  "curation_standard": {
+    "record_classification": "LITERATURE_CURATED_HISTORICAL_RECORD",
+    "acquisition_method": "MANUAL_RESEARCH_AND_CURATED_EXTRACTION",
+    "epistemic_honesty_statement": "All records in this catalog are derived from manual research and extraction from published peer-reviewed scientific papers, official post-disaster needs assessment reports (PDNA), Geological Survey of India special publications, and published disaster news archives. No internal government servers, proprietary databases, or unpublished state registers were directly accessed. Where source-native record IDs were not directly provided by a machine-readable source, source_native_id is strictly set to NULL."
+  },
+  "controlled_vocabularies": {
+    "source_access_status": [
+      "VERIFIED_PUBLISHED_SECONDARY_SOURCE",
+      "UNVERIFIED_DOCUMENT_REFERENCE"
+    ],
+    "extraction_method": [
+      "MAP_GEOREFERENCED_DIGITIZATION",
+      "TEXT_TABULAR_EXTRACTION"
+    ],
+    "location_method": [
+      "SATELLITE_DEBRIS_FAN_DELINEATION",
+      "PUBLISHED_MAP_GEOREFERENCING",
+      "HIGHWAY_LANDMARK_CORRIDOR_MATCH",
+      "VILLAGE_SETTLEMENT_CENTROID_MATCH"
+    ]
+  },
+  "temporal_coverage": "1998 - 2024",
+  "canonical_fatalities_sum": 6913,
+  "canonical_discrete_events": 22
+}

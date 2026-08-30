@@ -5,7 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.core.config import settings
 from backend.services.data_loader import data_store
-from backend.api.routes import system, decision, villages, zones, candidate_areas, hazards, pipeline, authority
+from backend.api.routes import (
+    system, decision, villages, zones, candidate_areas, hazards,
+    pipeline, authority, infrastructure, disasters, roads, lulc
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,8 +45,12 @@ app.include_router(villages.router, prefix="/api/villages", tags=["Villages"])
 app.include_router(zones.router, prefix="/api", tags=["Zones"])
 app.include_router(candidate_areas.router, prefix="/api", tags=["Candidate Areas"])
 app.include_router(hazards.router, prefix="/api", tags=["Hazards"])
-app.include_router(pipeline.router, prefix="/api", tags=["Pipeline"])  # Phase A -- Dynamic Update
-app.include_router(authority.router, prefix="/api", tags=["Authority"])  # Phase F -- Authority Action Center
+app.include_router(infrastructure.router, prefix="/api", tags=["Infrastructure"])
+app.include_router(disasters.router, prefix="/api", tags=["Disasters"])
+app.include_router(roads.router, prefix="/api", tags=["Roads"])
+app.include_router(lulc.router, prefix="/api", tags=["LULC"])
+app.include_router(pipeline.router, prefix="/api", tags=["Pipeline"])
+app.include_router(authority.router, prefix="/api", tags=["Authority"])
 
 @app.get("/", tags=["System"])
 def root():
@@ -61,6 +68,13 @@ def root():
             "red_zones": "/api/red-zones",
             "candidate_areas": "/api/candidate-areas",
             "hazards": "/api/hazards",
+            "infrastructure": "/api/infrastructure",
+            "infrastructure_summary": "/api/infrastructure/summary",
+            "disasters": "/api/disasters",
+            "disaster_summary": "/api/disasters/summary",
+            "roads": "/api/roads",
+            "road_summary": "/api/roads/summary",
+            "lulc_summary": "/api/lulc/summary",
             "pipeline_recompute": "/api/pipeline/recompute",
             "authority_action_queue": "/api/authority/action-queue",
             "authority_block_summary": "/api/authority/block-summary",

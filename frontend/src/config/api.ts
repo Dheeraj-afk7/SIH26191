@@ -18,4 +18,11 @@ export const API_ENDPOINTS = {
   CANDIDATE_AREAS: `${API_BASE_URL}/api/candidate-areas`,
   CANDIDATE_AREA_BY_ID: (id: string) => `${API_BASE_URL}/api/candidate-areas/${id}`,
   HAZARDS: `${API_BASE_URL}/api/hazards`,
+  INFRASTRUCTURE: `${API_BASE_URL}/api/infrastructure`,
+  INFRASTRUCTURE_SUMMARY: `${API_BASE_URL}/api/infrastructure/summary`,
+  DISASTERS: `${API_BASE_URL}/api/disasters`,
+  DISASTER_SUMMARY: `${API_BASE_URL}/api/disasters/summary`,
+  ROADS: `${API_BASE_URL}/api/roads`,
+  ROADS_SUMMARY: `${API_BASE_URL}/api/roads/summary`,
+  LULC_SUMMARY: `${API_BASE_URL}/api/lulc/summary`,
 } as const;

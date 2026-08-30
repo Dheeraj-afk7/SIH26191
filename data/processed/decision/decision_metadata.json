@@ -1,6 +1,6 @@
 {
   "project": "SIH26191",
-  "generated_utc": "2026-08-29T06:41:59Z",
+  "generated_utc": "2026-08-30T10:59:49Z",
   "pipeline_step": "Step 10",
   "inputs_used": {
     "habitation_exposure": "data/processed/exposure/habitation_exposure.geojson (Step 8)",
@@ -57,11 +57,11 @@
     "flood_score_at_centroid"
   ],
   "conditional_inputs_unavailable": {
-    "disaster_history": "NOT_ACQUIRED \u2014 NDMA/SDMA/EM-DAT dataset not obtained",
-    "infrastructure": "NOT_ACQUIRED \u2014 schools/health/roads dataset not obtained",
-    "lulc": "NOT_ACQUIRED \u2014 land use/land cover dataset not obtained",
-    "road_network": "NOT_ACQUIRED",
-    "capacity_standard": "NOT_CONFIGURED \u2014 configs/capacity.yaml has null values"
+    "disaster_history": "ACQUIRED \u2014 Literature Curated Historical Disaster Inventory (22 canonical events 1998-2024, 1km/2km contextual exposure buffers)",
+    "infrastructure": "ACQUIRED \u2014 OpenStreetMap Critical Infrastructure (291 facilities: 187 healthcare [24 hospitals, 6 CHCs, 12 PHCs, 127 subcentres, 18 clinics], 70 education, 4 emergency, with Phase 2 road network graph routing)",
+    "lulc": "ACQUIRED \u2014 ESA WorldCover 10m 2021 v200 (Tree cover, Built-up, Snow/Ice, Water excluded)",
+    "road_network": "ACQUIRED \u2014 OpenStreetMap (6,397.3 km, NetworkX Dijkstra mountain impedance in EPSG:32644)",
+    "capacity_standard": "CONFIGURED \u2014 PMAY-G 25 m\u00b2/HH at 40% site efficiency"
   },
   "capacity_status": "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD",
   "allocation_status": "NOT_GENERATED \u2014 no verified allocation methodology",

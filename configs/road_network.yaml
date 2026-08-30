@@ -1,0 +1,124 @@
+# ==============================================================================
+# SIH26191 -- Phase 2: Routable Road Network & Mountain Accessibility Config
+# ==============================================================================
+# Pilot Area: Rudraprayag District, Uttarakhand, India
+# CRS: EPSG:32644 (UTM Zone 44N)
+#
+# IMPORTANT METHODOLOGICAL DISCLAIMER:
+# Assumed speeds, impedance weights, and isolation thresholds defined here are
+# ANALYTICAL PLANNING ASSUMPTIONS for rugged Himalayan terrain, NOT observed empirical
+# speeds or engineering certifications. OSM attributes are preserved without assuming
+# all-weather passability. Actual travel times depend on weather, seasonal monsoon
+# landslides, road maintenance status, and vehicle type.
+# ==============================================================================
+
+version: "1.0"
+project: "SIH26191"
+target_crs: "EPSG:32644"
+
+# ------------------------------------------------------------------------------
+# 1. Dataset Paths
+# ------------------------------------------------------------------------------
+paths:
+  raw_roads_geojson: "data/raw/roads/osm_roads_rudraprayag.geojson"
+  processed_roads_gpkg: "data/processed/roads/routable_road_network.gpkg"
+  graph_pickle: "data/processed/roads/road_graph.pickle"
+  summary_json: "data/processed/roads/road_summary.json"
+  habitations_geojson: "data/processed/exposure/habitation_exposure.geojson"
+  candidate_areas_geojson: "data/outputs/candidate_topographically_feasible_areas_attributed.geojson"
+
+# ------------------------------------------------------------------------------
+# 2. Highway Hierarchy & Inclusion Filter
+# ------------------------------------------------------------------------------
+highway_filtering:
+  # Included classes in the vehicular routable network
+  vehicular_classes:
+    - "trunk"          # NH-107 (Kedarnath Highway), NH-07 (Badrinath Highway)
+    - "trunk_link"
+    - "primary"        # State Highways (SH-34, SH-15)
+    - "primary_link"
+    - "secondary"      # Major District Roads (MDR)
+    - "secondary_link"
+    - "tertiary"       # Other District Roads (ODR) / PMGSY Rural Roads
+    - "tertiary_link"
+    - "unclassified"   # Rural link roads
+    - "residential"    # Settlement interior access roads
+    - "service"        # Public facility / institutional access
+    - "track"          # Unpaved mountain jeep tracks (seasonal)
+
+  # Pedestrian & Bridleway classes (kept in layer for non-vehicular connectivity analysis)
+  pedestrian_classes:
+    - "path"           # Mountain walking tracks / pilgrim foot trails
+    - "footway"
+    - "bridleway"      # Mule tracks (Kedarnath trek route)
+    - "steps"
+    - "pedestrian"
+
+  # Excluded construction / private / abandoned classes
+  excluded_classes:
+    - "construction"
+    - "proposed"
+    - "abandoned"
+    - "raceway"
+
+# ------------------------------------------------------------------------------
+# 3. Mountain Travel Speed Assumptions (km/h)
+# ------------------------------------------------------------------------------
+# Configurable analytical planning assumptions for mountain travel impedance.
+# In high-relief Himalayan terrain with steep switchbacks and single-lane carriageways:
+assumed_speeds_kmh:
+  trunk: 35.0          # NH corridors (Char Dham all-weather highways)
+  trunk_link: 25.0
+  primary: 30.0        # State highways
+  primary_link: 20.0
+  secondary: 25.0      # Major district roads
+  secondary_link: 20.0
+  tertiary: 20.0       # PMGSY / Rural district roads
+  tertiary_link: 15.0
+  unclassified: 18.0   # Paved / semi-paved rural spurs
+  residential: 15.0    # Village internal roads
+  service: 15.0
+  track: 10.0          # Unpaved 4WD jeep tracks
+  path: 3.5            # Foot travel / porter walking speed
+  bridleway: 4.0       # Mule / pack animal travel speed
+  footway: 3.5
+  steps: 2.0
+  default_speed: 15.0
+
+# ------------------------------------------------------------------------------
+# 4. Deterministic Accessibility Classification Precedence
+# ------------------------------------------------------------------------------
+# Precedence ladder applied in order (top to bottom):
+# 1. ISOLATED_GRAPH_DISCONNECTED:
+#    Topological path to arterial corridor (NH-107/NH-07/SH) does NOT exist in graph OR snapping > 3,000 m.
+# 2. SEVERELY_REMOTE:
+#    Topological route exists, but network travel time to arterial corridor > 90 min OR snapping 1,500 m - 3,000 m.
+# 3. REMOTE:
+#    Topological route exists, network travel time is 45 min - 90 min, AND snapping <= 1,500 m.
+# 4. MODERATELY_ACCESSIBLE:
+#    Topological route exists, network travel time is 15 min - 45 min, AND snapping <= 1,000 m.
+# 5. HIGHLY_ACCESSIBLE:
+#    Topological route exists, network travel time <= 15 min, AND snapping <= 500 m.
+
+thresholds:
+  max_snapping_radius_m: 3000.0
+
+  travel_time_thresholds_min:
+    highly_accessible_max: 15.0
+    moderately_accessible_max: 45.0
+    remote_max: 90.0
+    severely_remote_min: 90.0
+
+  snapping_distance_thresholds_m:
+    highly_accessible_max: 500.0
+    moderately_accessible_max: 1000.0
+    remote_max: 1500.0
+    severely_remote_max: 3000.0
+
+# ------------------------------------------------------------------------------
+# 5. Output Attribution Fields & Routing Semantics
+# ------------------------------------------------------------------------------
+labels:
+  routing_semantics: "network_travel_time_to_arterial_min measures travel time along the road graph to the primary National/State Highway arterial corridor (NH-107, NH-07, SH-34, SH-15). It does NOT measure hospital or emergency services response time (reserved for Phase 4)."
+  methodology: "NetworkX graph shortest-path Dijkstra multi-source traversal along OSM road geometry in EPSG:32644 with mountain speed impedance"
+  disclaimer: "ANALYTICAL ROAD ACCESSIBILITY ESTIMATE ONLY. Speeds are planning assumptions, not observed real-time travel times. OSM attributes do not certify all-weather passability or structural road safety under monsoon conditions."

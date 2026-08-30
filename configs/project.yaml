@@ -72,6 +72,19 @@ paths:
   redzones_geojson: "data/outputs/candidate_hazard_based_red_zones.geojson"
   redzones_raster: "data/processed/hazards/candidate_redzone_raster.tif"
 
+  # Land Use / Land Cover & Ecological Layers (Phase 1)
+  lulc_dir: "data/processed/lulc"
+  lulc_raster: "data/processed/lulc/rudraprayag_worldcover_30m.tif"
+  protected_areas_raster: "data/processed/lulc/protected_areas_30m.tif"
+  ecological_exclusion_mask: "data/processed/lulc/ecological_exclusion_mask.tif"
+
+  # Routable Road Network & Mountain Accessibility (Phase 2)
+  roads_dir: "data/processed/roads"
+  roads_raw_geojson: "data/raw/roads/osm_roads_rudraprayag.geojson"
+  roads_processed_gpkg: "data/processed/roads/routable_road_network.gpkg"
+  roads_graph_pickle: "data/processed/roads/road_graph.pickle"
+  roads_summary_json: "data/processed/roads/road_summary.json"
+
 
 # ------------------------------------------------------------------------------
 # 4. Pilot Scope Configuration
@@ -414,6 +427,17 @@ candidate_areas:
     # null = no elevation cap applied.
     # JUSTIFICATION REQUIRED before setting: cite planning authority source.
     elevation_max_m: null
+
+    # Exclude Ecological & Forest Sensitive Areas (Phase 1)?
+    # true = Excludes ESA WorldCover Class 10 (Tree Cover), Class 80 (Water Bodies),
+    #        Class 70 (Snow/Ice), and Kedarnath Wildlife Sanctuary statutory boundary.
+    # JUSTIFICATION: Ensures relocation candidates are not screened inside legally protected
+    # wildlife sanctuaries, dense forest canopy requiring central Forest Conservation Act
+    # clearances, or river channels.
+    # Phase LULC-1: Configured 2026-08-30.
+    exclude_ecological_sensitive_areas: true
+    ecological_mask_path: "data/processed/lulc/ecological_exclusion_mask.tif"
+    lulc_raster_path: "data/processed/lulc/rudraprayag_worldcover_30m.tif"
 
   # ── MINIMUM MAPPING UNIT ─────────────────────────────────────────────────────
   filtering:
