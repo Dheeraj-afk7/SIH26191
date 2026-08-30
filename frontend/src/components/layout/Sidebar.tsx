@@ -9,7 +9,9 @@ import {
   Activity,
   ShieldAlert,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Shield,
+  RefreshCw
 } from 'lucide-react';
 import { PROJECT_INFO } from '../../config/constants';
 import { InfoTooltip } from '../shared/InfoTooltip';
@@ -54,9 +56,9 @@ const NAV_ITEMS: NavItem[] = [
   {
     path: '/candidate-areas',
     label: 'Candidate Areas',
-    description: 'Preliminary terrain-screened candidate extents (CA-0001 to CA-0005) with slope & distance metrics.',
+    description: '6,823 terrain-screened polygons (slope ≤ 20°). Displaying top areas by size. All require field verification.',
     icon: Layers,
-    badge: '5',
+    badge: '6823',
     step: '04',
   },
   {
@@ -65,6 +67,20 @@ const NAV_ITEMS: NavItem[] = [
     description: 'Full audit of deterministic 10-step pipeline rules, data provenance matrix, and caveats.',
     icon: BookOpenCheck,
     step: '05',
+  },
+  {
+    path: '/authority',
+    label: 'Authority Action Center',
+    description: 'SDMA/DDMA priority action queue, block-level summary, and CSV export for district planning.',
+    icon: Shield,
+    badge: '!',
+    step: '06',
+  },
+  {
+    path: '/pipeline',
+    label: 'Pipeline Recompute',
+    description: 'Operator-triggered workflow to recompute classifications after threshold or data updates.',
+    icon: RefreshCw,
   },
   {
     path: '/status',

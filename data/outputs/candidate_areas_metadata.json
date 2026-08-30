@@ -2,7 +2,7 @@
   "project": "SIH26191",
   "step": "Step 9 -- Candidate Topographically Feasible Area Identification",
   "pilot_district": "Rudraprayag, Uttarakhand, India",
-  "generated_utc": "2026-08-29T06:00:38Z",
+  "generated_utc": "2026-08-29T21:52:51Z",
   "methodology_version": "1.0",
   "crs": "EPSG:32644",
   "pixel_area_m2": 847.1484,
@@ -16,12 +16,12 @@
     "exclude_flood_class_3": "APPLIED: 124137 pixels excluded",
     "exclude_redzone_pixels": "APPLIED: 2634 pixels excluded",
     "exclude_nodata": "APPLIED: 164415 pixels excluded",
-    "slope_max_deg": "NOT_CONFIGURED",
+    "slope_max_deg": "APPLIED: 20.0 deg, 3548200 pixels excluded",
     "redzone_buffer_m": "NOT_CONFIGURED",
     "exclude_flood_class_2": "NOT_CONFIGURED",
     "exclude_mh_class_2": "NOT_CONFIGURED",
     "elevation_max_m": "NOT_CONFIGURED",
-    "minimum_area_m2": "NOT_CONFIGURED"
+    "minimum_area_m2": "APPLIED: 10000.0 m2, 24835 clusters dropped"
   },
   "habitation_demographics": {
     "status": "AVAILABLE",
@@ -29,9 +29,9 @@
     "nearest_village_pop_included": true
   },
   "outputs": {
-    "base_features": 5,
-    "base_total_area_ha": 361307.95,
-    "attributed_features": 5,
+    "base_features": 6823,
+    "base_total_area_ha": 57067.14,
+    "attributed_features": 6823,
     "files": {
       "exclusion_mask": "data\\processed\\sites\\combined_exclusion_mask.tif",
       "area_raster": "data\\processed\\sites\\candidate_area_raster.tif",
@@ -51,5 +51,5 @@
     "flood_exposure_proxy": "data/processed/hazards/flood_exposure_proxy.tif"
   },
   "disclaimer": "Preliminary decision-support candidate requiring field verification. Not an official site authorization or safety certification. Geotechnical and infrastructure assessment required before any relocation action.",
-  "processing_time_seconds": 128.25
+  "processing_time_seconds": 263.12
 }

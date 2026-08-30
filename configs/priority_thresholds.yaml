@@ -140,3 +140,174 @@ output:
     scores applied. Vulnerability indicators (literacy, SC/ST, children,
     non-workers) are included as context fields only — indicator weights have
     not been verified and are NOT used in tier assignment.
+
+# ── Relocation Planning Horizons (Phase E — PS-7) ────────────────────────────
+# Maps each priority tier to a PS-mandated relocation planning horizon.
+# These are DECISION-SUPPORT LABELS ONLY — NOT official relocation orders.
+# All outputs require official SDMA review before any planning action.
+relocation_horizons:
+  Tier1_AttentionPriority:
+    horizon: "IMMEDIATE_FIELD_ASSESSMENT"
+    display_label: "Immediate Field Assessment"
+    recommended_action: >-
+      Recommend immediate field verification by SDMA/district team. Priority for
+      geotechnical survey scheduling. Community consultation required before any
+      relocation planning action.
+    horizon_rationale: >-
+      Village is within 500m of a Candidate Hazard-Based Red Zone with Moderate
+      or Higher multi-hazard class at centroid, OR centroid directly overlaps a
+      Candidate Red Zone polygon.
+    horizon_limitations: >-
+      Classification is based on GIS proximity and terrain screening only.
+      Does not incorporate verified disaster history, infrastructure survey,
+      or geotechnical assessment. Centroid-based proximity may understate
+      actual settlement extent into hazard terrain.
+    planning_horizon_years: "0-1"
+    ps_alignment: "Immediate relocation need (PS-7)"
+    disclaimer: >-
+      DECISION SUPPORT ONLY — NOT AN OFFICIAL RELOCATION ORDER OR EVACUATION NOTICE.
+      Requires official government review and community consent before any action.
+
+  Tier2_ElevatedAttention:
+    horizon: "SHORT_TERM_PLANNING_REVIEW"
+    display_label: "Short-Term Planning Review"
+    recommended_action: >-
+      Recommend inclusion in 1-3 year district hazard planning cycle. Block-level
+      vulnerability mapping and infrastructure audit advised. Monitor for changes
+      in hazard indicators.
+    horizon_rationale: >-
+      Village is within 2000m of a Candidate Hazard-Based Red Zone.
+      Elevated proximity warrants inclusion in near-term planning agenda.
+    horizon_limitations: >-
+      Disaster history not integrated. Vulnerability indicators available as
+      context only. Road accessibility and infrastructure proximity not assessed.
+    planning_horizon_years: "1-3"
+    ps_alignment: "Short-term relocation need (PS-7)"
+    disclaimer: >-
+      DECISION SUPPORT ONLY — NOT AN OFFICIAL RELOCATION ORDER.
+      Requires official government review before any planning action.
+
+  Tier3_Monitoring:
+    horizon: "MEDIUM_TERM_MONITORING"
+    display_label: "Medium-Term Monitoring"
+    recommended_action: >-
+      Include in district hazard monitoring programme. Update assessment when
+      new hazard data is available. No immediate field action required based
+      on current screening.
+    horizon_rationale: >-
+      Village is within 5000m of a Candidate Hazard-Based Red Zone.
+      Contextual monitoring proximity — warrants awareness but not immediate action.
+    horizon_limitations: >-
+      Distance-based proximity only. Disaster history not integrated. Terrain
+      between village and hazard zone not assessed for connectivity.
+    planning_horizon_years: "3-10"
+    ps_alignment: "Medium-term relocation need (PS-7)"
+    disclaimer: >-
+      DECISION SUPPORT ONLY — Monitoring category does not imply absence of risk.
+
+  BeyondProximity:
+    horizon: "ROUTINE_MONITORING"
+    display_label: "Routine Monitoring"
+    recommended_action: >-
+      Include in periodic district hazard survey update cycle. No priority
+      action indicated by current screening.
+    horizon_rationale: >-
+      Village centroid is more than 5000m from the nearest Candidate Hazard-Based
+      Red Zone based on current screening data.
+    horizon_limitations: >-
+      Does not imply the village is safe. Other hazard factors not captured by
+      this screening (e.g. geological, rainfall, local terrain) may apply.
+      Screening extent is limited by available DEM data.
+    planning_horizon_years: "10+"
+    ps_alignment: "Lower immediate priority — routine monitoring (PS-7)"
+    disclaimer: >-
+      DECISION SUPPORT ONLY — Beyond proximity does not certify safety.
+
+# -- Vulnerability Thresholds (Phase C -- PS-3) --
+# Threshold-based flags derived from Census 2011 PCA indicators.
+# These are CONTEXT FLAGS ONLY -- they do NOT change tier assignment.
+#
+# THRESHOLDS ARE DATA-BENCHMARKED from actual Rudraprayag Census 2011 data (653 villages):
+#   child_proportion:  mean=0.127, P50=0.127, P75=0.151
+#   sc_proportion:     mean=0.147, P50=0.038, P75=0.246
+#   st_proportion:     mean=0.001, P50=0.000, P75=0.000  <- ESSENTIALLY ZERO IN DISTRICT
+#   non_worker_rate:   mean=0.525, P50=0.517, P75=0.579
+#   illiteracy_rate:   mean=0.296, P50=0.295, P75=0.340
+#
+# All thresholds set at district P75 (upper tertile) computed from actual Census data.
+# Each flag expected to activate for approximately 25% of villages.
+# Source: Census of India 2011, PCA, Rudraprayag District (653 village records).
+vulnerability_thresholds:
+  methodology: >-
+    Threshold-based binary flags derived from Census 2011 PCA demographic
+    indicators. Thresholds are set at the district P75 (upper tertile) computed
+    directly from Census 2011 data for 653 Rudraprayag habitations.
+    Flags are CONTEXT FIELDS ONLY -- they do NOT alter tier assignment.
+    They assist SDMA analysts in identifying villages where demographic
+    vulnerability may compound hazard proximity risk.
+
+  # Child population flag -- children < 6 as share of total pop
+  # P75 = 0.151 computed from 653 Rudraprayag villages. Flags upper ~25%.
+  child_population:
+    field: "child_proportion"
+    threshold: 0.151
+    threshold_basis: "District P75 from Census 2011 PCA (653 villages, Rudraprayag)"
+    flag_field: "vf_high_child_pop"
+    flag_label: "High Child Pop"
+    description: "Child proportion (under 6) exceeds district P75 (0.151)"
+    basis: "Census PCA 2011 field P_06 / TOT_P"
+    disclaimer: "Context flag only. Flags upper ~25% of district villages."
+
+  # SC proportion flag (SC only -- ST flag removed because ST P75=0.000 in Rudraprayag)
+  # P75 = 0.246 computed from 653 Rudraprayag villages. Flags upper ~25%.
+  sc_population:
+    field: "sc_proportion"
+    threshold: 0.246
+    threshold_basis: "District P75 from Census 2011 PCA (653 villages, Rudraprayag)"
+    flag_field: "vf_high_sc"
+    flag_label: "High SC Pop"
+    description: "SC proportion exceeds district P75 (0.246)"
+    basis: "Census PCA 2011 field TOT_SC / TOT_P"
+    disclaimer: >-
+      Context flag only. SC status does not imply higher disaster risk.
+      Flags historically underserved communities for equity-sensitive planning.
+    note_on_st: "ST population in Rudraprayag P75=0.000 (effectively absent). ST flag omitted."
+
+  # Non-worker dependency flag
+  # P75 = 0.579 computed from 653 Rudraprayag villages. Flags upper ~25%.
+  non_worker_dependency:
+    field: "non_worker_rate"
+    threshold: 0.579
+    threshold_basis: "District P75 from Census 2011 PCA (653 villages, Rudraprayag)"
+    flag_field: "vf_high_dependency"
+    flag_label: "High Dependency"
+    description: "Non-worker rate exceeds district P75 (0.579)"
+    basis: "Census PCA 2011: (TOT_P - MAIN_WORK_P - MARG_WORK_P) / TOT_P"
+    disclaimer: "Context flag only. Flags upper ~25% of district villages."
+
+  # Illiteracy flag
+  # P75 = 0.340 computed from 653 Rudraprayag villages. Flags upper ~25%.
+  illiteracy:
+    field: "illiteracy_rate"
+    threshold: 0.340
+    threshold_basis: "District P75 from Census 2011 PCA (653 villages, Rudraprayag)"
+    flag_field: "vf_high_illiteracy"
+    flag_label: "High Illiteracy"
+    description: "Illiteracy rate exceeds district P75 (0.340)"
+    basis: "Census PCA 2011 field P_ILL / TOT_P"
+    disclaimer: "Context flag only. Flags upper ~25% of district villages."
+
+  output:
+    count_field: "vulnerability_flag_count"
+    context_field: "vulnerability_context"
+    n_flags_total: 4
+    context_template: "{count} of 4 vulnerability factors flagged"
+    high_vulnerability_threshold: 2
+    high_vulnerability_note: >-
+      Villages with 2 or more vulnerability factors flagged are highlighted
+      in the Authority Action Center for elevated attention.
+    overall_disclaimer: >-
+      Vulnerability flags are CONTEXT INFORMATION ONLY derived from Census 2011
+      data. Thresholds are district P75 values -- not composite weights.
+      Flags do NOT alter priority tier assignment. Census 2011 is 15 years old.
+      Field verification required before any planning action.

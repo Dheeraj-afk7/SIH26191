@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from backend.core.config import settings
 from backend.services.data_loader import data_store
-from backend.api.routes import system, decision, villages, zones, candidate_areas, hazards
+from backend.api.routes import system, decision, villages, zones, candidate_areas, hazards, pipeline, authority
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,6 +42,8 @@ app.include_router(villages.router, prefix="/api/villages", tags=["Villages"])
 app.include_router(zones.router, prefix="/api", tags=["Zones"])
 app.include_router(candidate_areas.router, prefix="/api", tags=["Candidate Areas"])
 app.include_router(hazards.router, prefix="/api", tags=["Hazards"])
+app.include_router(pipeline.router, prefix="/api", tags=["Pipeline"])  # Phase A -- Dynamic Update
+app.include_router(authority.router, prefix="/api", tags=["Authority"])  # Phase F -- Authority Action Center
 
 @app.get("/", tags=["System"])
 def root():
@@ -58,7 +60,11 @@ def root():
             "villages": "/api/villages",
             "red_zones": "/api/red-zones",
             "candidate_areas": "/api/candidate-areas",
-            "hazards": "/api/hazards"
+            "hazards": "/api/hazards",
+            "pipeline_recompute": "/api/pipeline/recompute",
+            "authority_action_queue": "/api/authority/action-queue",
+            "authority_block_summary": "/api/authority/block-summary",
+            "authority_report_csv": "/api/authority/report.csv",
         }
     }
 

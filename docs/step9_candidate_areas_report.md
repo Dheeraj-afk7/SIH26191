@@ -1,6 +1,6 @@
 # Step 9 — Candidate Topographically Feasible Area Identification Report
 
-**Generated (UTC):** 2026-08-29T06:00:38Z  
+**Generated (UTC):** 2026-08-29T21:52:51Z  
 **Project:** SIH26191 — Rudraprayag District, Uttarakhand  
 **Pipeline Version:** 1.0  
 **Status:** DECISION SUPPORT SCREENING OUTPUT — Requires Official Verification
@@ -19,17 +19,16 @@
 
 Step 9 applied a deterministic terrain-based screening pipeline to identify
 **Candidate Topographically Feasible Areas** across Rudraprayag District.
-*(Note: This is preliminary screened terrain, not a final recommended relocation area. Since many optional criteria were null, the area serves as a starting point.)*
 All configurable screening parameters were set to `null` (NOT CONFIGURED) and
 were explicitly skipped. Only deterministic exclusions based on the verified
-preceding pipeline stages' outputs were applied.
+Step 4–7 pipeline outputs were applied.
 
 | Metric | Value |
 |--------|-------|
-| Candidate area features (9B base) | **5** |
-| Total candidate terrain area | **361,307.9 ha** |
-| Largest single candidate area | **361,306.8 ha** |
-| Smallest single candidate area | **847 m²** |
+| Candidate area features (9B base) | **6,823** |
+| Total candidate terrain area | **57,067.1 ha** |
+| Largest single candidate area | **3,547.6 ha** |
+| Smallest single candidate area | **10,166 m²** |
 | Pixel area | 847.15 m² (29.11 m × 29.11 m) |
 | CRS | EPSG:32644 (WGS 84 / UTM Zone 44N) |
 | Step 9C attribution | Completed |
@@ -45,12 +44,12 @@ preceding pipeline stages' outputs were applied.
 | `exclude_flood_class_3` | APPLIED: 124137 pixels excluded | APPLIED |
 | `exclude_redzone_pixels` | APPLIED: 2634 pixels excluded | APPLIED |
 | `exclude_nodata` | APPLIED: 164415 pixels excluded | APPLIED |
-| `slope_max_deg` | NOT_CONFIGURED | NOT_CONFIGURED |
+| `slope_max_deg` | APPLIED: 20.0 deg, 3548200 pixels excluded | APPLIED |
 | `redzone_buffer_m` | NOT_CONFIGURED | NOT_CONFIGURED |
 | `exclude_flood_class_2` | NOT_CONFIGURED | NOT_CONFIGURED |
 | `exclude_mh_class_2` | NOT_CONFIGURED | NOT_CONFIGURED |
 | `elevation_max_m` | NOT_CONFIGURED | NOT_CONFIGURED |
-| `minimum_area_m2` | NOT_CONFIGURED | NOT_CONFIGURED |
+| `minimum_area_m2` | APPLIED: 10000.0 m2, 24835 clusters dropped | APPLIED |
 
 ---
 
@@ -75,7 +74,6 @@ The following exclusions were always applied regardless of configurable paramete
 The habitation dataset (`habitation_exposure.geojson`) was inspected before Step 9C.
 Geometry source: SHRUG v2.2 spatial centroids (Development Data Lab).
 Join method: Exact integer code match (Census Town/Village = SHRUG pc11_village_id).
-*(This demographic linkage was verified through the project's strict Census/code-based validation process, confirming its trustworthiness for decision support.)*
 Village centroid points represent administrative reference locations, NOT building footprints.
 Proximity calculations are centroid-to-centroid Euclidean distances in EPSG:32644.
 

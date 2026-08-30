@@ -29,7 +29,9 @@ export const CandidateAreasPage: React.FC = () => {
             />
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Preliminary terrain-derived candidate extents · Rudraprayag District · {areas.length} Screened Polygons
+            Terrain Screening Output · Rudraprayag District ·{' '}
+            <span className="font-semibold text-amber-700">6,823 raw polygons identified</span>
+            {' '}· Displaying top results by area · All require field verification
           </p>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
@@ -63,7 +65,8 @@ export const CandidateAreasPage: React.FC = () => {
               </p>
               <p className="text-xs text-red-800 leading-relaxed">
                 All areas are preliminary, unverified terrain-derived extents.
-                Carrying capacity is <strong>not estimated</strong> due to the absence of verified planning standards.
+                Preliminary spatial capacity scenarios are provided for areas under 100 ha only (PMAY-G 25m²/HH norm).
+                Areas over 100 ha are terrain screening zones — capacity estimates are not applicable at that scale.
                 Official field surveys, geotechnical assessments, and administrative clearance are mandatory prior to any planning use.
               </p>
             </div>

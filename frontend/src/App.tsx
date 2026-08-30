@@ -11,6 +11,8 @@ import { VillageDetailPage } from './pages/VillageDetailPage';
 import { CandidateAreasPage } from './pages/CandidateAreasPage';
 import { MethodologyPage } from './pages/MethodologyPage';
 import { SystemStatusPage } from './pages/SystemStatusPage';
+import { AuthorityActionPage } from './pages/AuthorityActionPage';
+import { PipelineRecomputePage } from './pages/PipelineRecomputePage';
 
 // Configure TanStack Query Client
 const queryClient = new QueryClient({
@@ -37,6 +39,8 @@ export const App: React.FC = () => {
             <Route path="candidate-areas" element={<CandidateAreasPage />} />
             <Route path="methodology" element={<MethodologyPage />} />
             <Route path="status" element={<SystemStatusPage />} />
+            <Route path="authority" element={<AuthorityActionPage />} />
+            <Route path="pipeline" element={<PipelineRecomputePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

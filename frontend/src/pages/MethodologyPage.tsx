@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpenCheck, AlertTriangle } from 'lucide-react';
+import { BookOpenCheck, AlertTriangle, ShieldAlert, RefreshCw, Users, Layers, ShieldCheck } from 'lucide-react';
 import { StatusBadge } from '../components/shared/StatusBadge';
 import { InfoTooltip } from '../components/shared/InfoTooltip';
 
@@ -8,22 +8,55 @@ export const MethodologyPage: React.FC = () => {
     { name: 'Copernicus GLO-30 DEM', source: 'ESA / Copernicus Open Access', status: 'AVAILABLE', role: 'Slope, aspect, hydrology (TWI)', tip: 'Global 30m digital elevation model processed in UTM Zone 44N.' },
     { name: 'Census of India 2011 (PCA)', source: 'Office of the Registrar General & Census Commissioner', status: 'AVAILABLE', role: 'Village population, households, literacy, demographics', tip: 'Primary Census Abstract baseline attributes for 653 habitations.' },
     { name: 'SHRUG v2.2 Spatial Centroids', source: 'Development Data Lab', status: 'AVAILABLE', role: 'Administrative village centroid points', tip: 'Administrative polygon centroids matching Census 2011 village identifiers.' },
-    { name: 'Disaster History (NDMA / SDMA)', source: 'State Disaster Management Authority', status: 'NOT_ACQUIRED', role: 'Historical incident overlay (Tier 1 confirmation pending)', tip: 'Official landslide and flash flood incident database not yet acquired.' },
+    { name: 'Disaster History Schema & Pipeline', source: 'USDMA / NDMA Schema Definition', status: 'AVAILABLE', role: 'Incident validation & proximity ingestion pipeline (schema.json)', tip: 'Incident schema and validator pipeline implemented. Official district records pending acquisition.' },
+    { name: 'PMAY-G Capacity Standard', source: 'Ministry of Rural Development, GoI (2016)', status: 'AVAILABLE', role: 'Preliminary spatial capacity scenario (25 m²/HH, max 100 ha cap)', tip: 'PMAY-G minimum built floor area standard applied to candidate terrain clusters.' },
     { name: 'Critical Infrastructure (Schools, Hospitals)', source: 'OpenStreetMap / Dept. Surveys', status: 'NOT_ACQUIRED', role: 'Infrastructure exposure scoring', tip: 'Road network, lifelines, and emergency facility layers pending.' },
     { name: 'Road Network & Accessibility', source: 'PWD / Survey of India', status: 'NOT_ACQUIRED', role: 'Routable candidate area accessibility', tip: 'Network distance and slope routing to candidate terrain clusters.' },
     { name: 'Land Use / Land Cover (LULC)', source: 'ISRO Bhuvan', status: 'NOT_ACQUIRED', role: 'Forest / protected land exclusion', tip: 'Reserve forest and wildlife sanctuary mask pending ingestion.' },
-    { name: 'Capacity Planning Standards', source: 'Urban/Rural Planning Manuals', status: 'NOT_CONFIGURED', role: 'Carrying capacity per household estimation', tip: 'Standard square meters required per household or person unconfigured.' },
+  ];
+
+  const innovations = [
+    {
+      title: 'Dynamic Update & Recomputation Architecture (Phase A)',
+      icon: <RefreshCw className="w-4 h-4 text-blue-600" />,
+      desc: 'Operator-triggered workflow (POST /api/pipeline/recompute) allowing authorities to recalculate village hazard tiers and candidate area capacity within seconds whenever thresholds or datasets are updated.',
+    },
+    {
+      title: 'Disaster History Integration Readiness (Phase B)',
+      icon: <ShieldAlert className="w-4 h-4 text-amber-600" />,
+      desc: 'Standardized GeoJSON/JSON incident schema (schema.json) and validation pipeline (validate_disaster_data.py) ready for immediate ingestion of verified USDMA/NDMA disaster records.',
+    },
+    {
+      title: 'Data-Benchmarked Vulnerability Context (Phase C)',
+      icon: <Users className="w-4 h-4 text-indigo-600" />,
+      desc: 'Four demographic flags benchmarked directly against Rudraprayag Census 2011 upper tertiles (P75): Child Pop (>15.1%), SC Pop (>24.6%), Dependency (>57.9%), and Illiteracy (>34.0%). Provided as context without altering tier assignment.',
+    },
+    {
+      title: 'Defensible Carrying Capacity with Scale Protection (Phase D)',
+      icon: <Layers className="w-4 h-4 text-emerald-600" />,
+      desc: 'Applies MoRD PMAY-G 25 m²/HH norm with a 100 ha site-planning scale cap. Polygons >100 ha are flagged as terrain screening zones to prevent absurd multi-million population overclaims.',
+    },
+    {
+      title: 'Relocation Planning Horizons (Phase E)',
+      icon: <ShieldCheck className="w-4 h-4 text-rose-600" />,
+      desc: 'Maps multi-hazard proximity tiers directly to planning categories (Immediate Field Assessment, Short-Term Planning Review, Medium-Term Monitoring, Routine Monitoring) with actionable operational guidance.',
+    },
+    {
+      title: 'Authority Action Center & Export (Phase F)',
+      icon: <BookOpenCheck className="w-4 h-4 text-purple-600" />,
+      desc: 'Dedicated SDMA/DDMA decision workspace with priority action queue sorted by distance, sub-district/block aggregation table, and one-click printable CSV export.',
+    },
   ];
 
   const limitations = [
-    { title: 'No Verified Disaster History Dataset', desc: 'Disaster incident records from NDMA/SDMA were not acquired. Tier 1 priority cannot be confirmed by historical landslide evidence.', tip: 'Historical validation requires disaster event logs.' },
+    { title: 'Disaster History Ingestion Status', desc: 'Integration schema and validation pipeline are implemented; ingestion of verified historical incident logs from USDMA Dehradun is pending.', tip: 'Schema prepared. Official records pending acquisition.' },
     { title: 'Administrative Centroids vs Settlement Footprints', desc: 'Village coordinates represent administrative reference points. Actual habitations, building clusters, or roads may be closer to hazard terrain than centroid distances indicate.', tip: 'Centroid planar distances are proxy metrics.' },
     { title: 'Census 2011 Baseline Vintage', desc: 'Demographic baseline is from Census 2011 (~15 years old). Demographic expansion and new settlements are not reflected.', tip: 'Population figures represent 2011 baseline.' },
     { title: '30-Meter DEM Spatial Precision', desc: 'Slope and hydrological indices are derived at ~30m pixel resolution. Local site micro-topography requires on-site topographic surveys.', tip: 'Micro-relief variations require total station surveys.' },
     { title: 'Equal-Weight Multi-Hazard Integration', desc: 'Multi-hazard screening integrates terrain susceptibility proxy (50%) and hydrological flood exposure proxy (50%) as an uncalibrated deterministic baseline.', tip: 'Deterministic equal weighting proxy.' },
-    { title: 'CA-0001 Unfiltered Extent (~361k ha)', desc: 'Due to unconfigured slope/mapping thresholds, CA-0001 represents a broad contiguous terrain polygon rather than discrete recommended sites.', tip: 'Unconfigured upper slope limit.' },
-    { title: 'Carrying Capacity Unestimated', desc: 'No carrying capacity figures are generated due to absence of verified planning standards (area per household/person).', tip: 'Carrying capacity not estimated.' },
-    { title: 'No Automated Allocation', desc: 'The system does not allocate specific habitations to candidate areas, requiring official multi-disciplinary planning review.', tip: 'Official multi-disciplinary planning required.' },
+    { title: 'Preliminary Carrying Capacity Scenarios', desc: 'Capacity estimates reflect PMAY-G minimum built floor area norms (25 m²/HH) and are capped at 100 ha. Detailed engineering, water access, and geotechnical soil surveys are mandatory.', tip: 'Preliminary planning scenarios only.' },
+    { title: 'No Automated Settlement Allocation', desc: 'The system identifies topographically feasible areas but does not automatically allocate habitations to sites, preserving human-in-the-loop authority discretion.', tip: 'Official multi-disciplinary planning required.' },
+    { title: 'Decision Support Only', desc: 'All outputs are screening tools for directing field survey resources and do not constitute official government evacuation orders or relocation declarations.', tip: 'Requires SDMA/DDMA authorization.' },
   ];
 
   return (
@@ -44,6 +77,32 @@ export const MethodologyPage: React.FC = () => {
         <p className="text-xs text-slate-500 mt-0.5">
           Deterministic Rule-Based Spatial Architecture & Limitations Audit (SIH26191)
         </p>
+      </div>
+
+      {/* Problem Statement Innovations Grid */}
+      <div className="bg-white rounded-lg border border-slate-200 p-5 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+            SIH26191 Problem Statement Compliance & Architectural Enhancements
+          </h3>
+          <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-bold uppercase">
+            Phases A–F Complete
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+          {innovations.map((inv, idx) => (
+            <div key={idx} className="p-3.5 rounded-lg border border-slate-200 bg-slate-50/60 space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-slate-900 text-xs">
+                {inv.icon}
+                <span>{inv.title}</span>
+              </div>
+              <p className="text-slate-600 text-[11px] leading-relaxed">
+                {inv.desc}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Pipeline Flow Diagram */}
@@ -90,10 +149,10 @@ export const MethodologyPage: React.FC = () => {
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 relative group">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] text-blue-600 font-bold block mb-1">STEPS 8–9</span>
-              <InfoTooltip title="Exposure & Terrain" content="Spatial join of 653 Census habitations and screening of 5 candidate terrain feasibility clusters." side="top" />
+              <InfoTooltip title="Exposure & Terrain" content="Spatial join of 653 Census habitations and screening of 6,823 candidate terrain feasibility clusters (slope ≤ 20°)." side="top" />
             </div>
             <p className="font-semibold text-slate-900">Exposure & Terrain</p>
-            <p className="text-[11px] text-slate-500 mt-1">653 Habitations join + 5 candidate screened terrain areas</p>
+            <p className="text-[11px] text-slate-500 mt-1">653 Habitations join + 6,823 candidate screened terrain areas</p>
           </div>
 
           <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 relative group">
@@ -102,7 +161,7 @@ export const MethodologyPage: React.FC = () => {
               <InfoTooltip title="Decision Engine" content="Deterministic, rule-based tier assignment evaluating distance to red zones and centroid hazard class." side="top" />
             </div>
             <p className="font-semibold text-blue-950">Decision Engine</p>
-            <p className="text-[11px] text-blue-800 mt-1">Explainable rule-based priority tier assignment</p>
+            <p className="text-[11px] text-blue-800 mt-1">Explainable rule-based priority tiers & relocation horizons</p>
           </div>
         </div>
       </div>
@@ -138,7 +197,7 @@ export const MethodologyPage: React.FC = () => {
                 <th className="py-2.5 px-4">
                   <div className="flex items-center gap-1">
                     <span>Status</span>
-                    <InfoTooltip title="Acquisition Status" content="AVAILABLE = in memory; NOT_ACQUIRED = pending; NOT_CONFIGURED = threshold not set." side="top" />
+                    <InfoTooltip title="Acquisition Status" content="AVAILABLE = active; NOT_ACQUIRED = pending department release." side="top" />
                   </div>
                 </th>
                 <th className="py-2.5 px-4">

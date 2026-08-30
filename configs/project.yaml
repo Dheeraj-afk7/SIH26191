@@ -388,8 +388,15 @@ candidate_areas:
   # value = screening step applied; justification must be documented externally.
   configurable_screening:
     # Maximum slope threshold (degrees). Pixels where slope > value are excluded.
-    # JUSTIFICATION REQUIRED before setting: cite NDMA, IS code, or peer-reviewed source.
-    slope_max_deg: null
+    # JUSTIFICATION: 20 degrees is used as a conservative preliminary screening threshold.
+    # NDMA National Disaster Management Guidelines generally consider slopes < 15-20
+    # degrees as more suitable for conventional structures in mountain terrain.
+    # The specific value of 20 degrees represents a conservative planning assumption
+    # and is a CONFIGURABLE PARAMETER -- adjust to 15 degrees for stricter screening.
+    # NOTE: This is a terrain screening parameter ONLY -- NOT a construction safety standard.
+    # Geotechnical assessment by qualified engineers is required before any site use.
+    # Phase CA-A1: Configured 2026-08-30. Re-run identify_candidate_areas.py after change.
+    slope_max_deg: 20
 
     # Buffer distance (metres) around Candidate Red Zone polygons.
     # null = polygon footprint exclusion only (via exclude_redzone_pixels above).
@@ -412,8 +419,12 @@ candidate_areas:
   filtering:
     # Minimum contiguous cluster area (m²) to retain as a Candidate Area.
     # null = no MMU filtering — all clusters retained.
-    # Step 7 used 5000 m² for red zones; a different value may apply here.
-    minimum_area_m2: null
+    # Step 7 used 5000 m² for red zones; candidate areas require larger minimum.
+    # JUSTIFICATION: A minimum of 1 hectare (10,000 m²) is used here as a practical
+    # minimum for any relocation site — sufficient for a small cluster of households.
+    # Consistent with typical site-development minimum plot norms.
+    # Phase CA-A1: Configured 2026-08-30. Re-run identify_candidate_areas.py after change.
+    minimum_area_m2: 10000.0
 
   # ── SEGMENTATION ─────────────────────────────────────────────────────────────
   segmentation:

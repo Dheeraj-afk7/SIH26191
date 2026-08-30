@@ -269,6 +269,44 @@ export const VillageDetailPage: React.FC = () => {
         </div>
       </div>
 
+      {/* PS-7: Relocation Planning Horizon & Recommended Action */}
+      <div className="bg-slate-900 text-white rounded-xl border border-slate-700 p-5 shadow-sm space-y-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+              Planning Horizon (PS-7)
+            </span>
+            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+              hasTier1 ? 'bg-red-500/20 text-red-300 border border-red-500/40' :
+              hasTier2 ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+              'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+            }`}>
+              {p.relocation_horizon_display || p.relocation_horizon || 'Routine Monitoring'}
+            </span>
+          </div>
+          <div className="text-xs text-slate-400">
+            Planning Horizon: <strong className="text-slate-200">{p.planning_horizon_years || (hasTier1 ? '0-1 yr' : hasTier2 ? '1-3 yrs' : '3-10 yrs')}</strong>
+          </div>
+        </div>
+
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">
+            Recommended Action for Authorities (SDMA / DDMA)
+          </p>
+          <p className="text-xs text-slate-200 leading-relaxed font-medium">
+            {p.recommended_action || (
+              hasTier1 ? 'Recommend immediate field verification by SDMA/district team. Priority for geotechnical survey scheduling. Community consultation required before any relocation planning action.' :
+              hasTier2 ? 'Recommend inclusion in 1-3 year district hazard planning cycle. Block-level vulnerability mapping and infrastructure audit advised.' :
+              'Include in periodic district hazard monitoring programme.'
+            )}
+          </p>
+        </div>
+
+        <p className="text-[10px] text-slate-500 italic pt-1">
+          Disclaimer: Decision-support screening category only — NOT an official government relocation order or evacuation notice.
+        </p>
+      </div>
+
       {/* Hazard & Demographic Context */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Spatial Hazard Context */}
@@ -315,46 +353,53 @@ export const VillageDetailPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Demographic Context — NOT used in classification */}
+        {/* Demographic & Vulnerability Context (PS-3) */}
         <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
               <Users className="w-4 h-4 text-slate-500" />
-              <span>Demographic Context</span>
+              <span>Demographic & Vulnerability Context (PS-3)</span>
             </h3>
             <div className="flex items-center gap-1">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-slate-100 border border-slate-300 text-slate-600 text-[10px] font-bold uppercase tracking-wide">
+              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border ${
+                (p.vulnerability_flag_count ?? 0) >= 2 
+                  ? 'bg-amber-100 border-amber-300 text-amber-800' 
+                  : 'bg-slate-100 border-slate-300 text-slate-600'
+              }`}>
                 <Info className="w-3 h-3" />
-                Context Only — Not Used in Priority
+                {p.vulnerability_context || `${p.vulnerability_flag_count ?? 0} of 4 factors flagged`}
               </span>
-              <InfoTooltip
-                title="Demographic Safety Isolation"
-                content="Social and demographic indicators are provided solely for planning context. They were strictly NOT used in priority tier scoring to prevent demographic bias."
-                side="left"
-              />
             </div>
           </div>
 
           <p className="text-[11px] text-slate-500 leading-tight bg-slate-50 px-2.5 py-1.5 rounded border border-slate-200">
-            Census 2011 social indicators are provided for planning context only.
-            They were <strong>NOT</strong> used in determining this village's priority tier.
+            Census 2011 PCA indicators benchmarked against district upper tertile (P75). 
+            Flags are <strong>context only</strong> and do not alter tier assignment.
           </p>
 
           <div className="space-y-0 text-xs divide-y divide-slate-100">
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-500">Illiteracy Rate</span>
+              <span className="text-slate-500">
+                Illiteracy Rate {p.vf_high_illiteracy && <span className="ml-1 text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-semibold">High (&gt;34%)</span>}
+              </span>
               <span className="font-mono font-medium text-slate-800">{formatPercent(p.illiteracy_rate)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-500">Children (0–6 yrs) Proportion</span>
+              <span className="text-slate-500">
+                Children (0–6 yrs) {p.vf_high_child_pop && <span className="ml-1 text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-semibold">High (&gt;15.1%)</span>}
+              </span>
               <span className="font-mono font-medium text-slate-800">{formatPercent(p.child_proportion)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-500">SC Proportion</span>
+              <span className="text-slate-500">
+                SC Proportion {p.vf_high_sc && <span className="ml-1 text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-semibold">High (&gt;24.6%)</span>}
+              </span>
               <span className="font-mono font-medium text-slate-800">{formatPercent(p.sc_proportion)}</span>
             </div>
             <div className="flex justify-between items-center py-2">
-              <span className="text-slate-500">Non-Worker Proportion</span>
+              <span className="text-slate-500">
+                Non-Worker Proportion {p.vf_high_dependency && <span className="ml-1 text-[10px] text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded font-semibold">High (&gt;57.9%)</span>}
+              </span>
               <span className="font-mono font-medium text-slate-800">{formatPercent(p.non_worker_rate)}</span>
             </div>
           </div>

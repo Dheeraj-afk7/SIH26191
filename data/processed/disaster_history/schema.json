@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0",
+  "status": "PENDING_DATA_ACQUISITION",
+  "district": "Rudraprayag, Uttarakhand, India",
+  "district_code": "05-03",
+  "acquisition_status": {
+    "sdma_uttarakhand": "PENDING",
+    "ndma_ndrf": "PENDING",
+    "relief_commissioner_uttarakhand": "PENDING",
+    "note": "Contact USDMA Dehradun (usdma.uk.gov.in) or NDMA (ndma.gov.in) to request district disaster incident records."
+  },
+  "integration_readiness": "SCHEMA_PREPARED -- Pipeline integration implemented. Data acquisition pending.",
+  "schema": {
+    "incident_id": {
+      "type": "string",
+      "format": "DIS-RDP-YYYY-NNN",
+      "example": "DIS-RDP-2013-001",
+      "required": true
+    },
+    "date": {
+      "type": "string",
+      "format": "ISO 8601 (YYYY-MM-DD)",
+      "required": true
+    },
+    "hazard_type": {
+      "type": "string",
+      "enum": ["LANDSLIDE", "FLOOD", "CLOUDBURST", "EARTHQUAKE", "LAND_SUBSIDENCE", "AVALANCHE", "OTHER"],
+      "required": true
+    },
+    "geometry": {
+      "type": "Point or Polygon",
+      "crs": "EPSG:4326 (WGS84)",
+      "note": "Point for approximate location; Polygon for known affected area",
+      "required": true
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["MINOR", "MODERATE", "MAJOR", "CATASTROPHIC"],
+      "required": true
+    },
+    "deaths_reported": {
+      "type": "integer",
+      "required": false,
+      "note": "Number of deaths reported. null if unknown."
+    },
+    "households_affected": {
+      "type": "integer",
+      "required": false
+    },
+    "villages_affected": {
+      "type": "array",
+      "items": {"type": "string", "description": "Census village ID (pc11_village_id)"},
+      "required": false
+    },
+    "verified_source": {
+      "type": "string",
+      "enum": ["OFFICIAL_GOVERNMENT", "NDRF_REPORT", "MEDIA_SECONDARY", "FIELD_SURVEY", "UNVERIFIED"],
+      "required": true
+    },
+    "source_document": {
+      "type": "string",
+      "description": "Citation for source document",
+      "required": true
+    },
+    "notes": {
+      "type": "string",
+      "required": false
+    }
+  },
+  "integration_pipeline": {
+    "validation_script": "processing/disaster_history/validate_disaster_data.py",
+    "proximity_analysis": "Compute distance from each incident point to all 653 village centroids",
+    "modulation_approach": "When verified disaster history is available, incidents within 2km of a village centroid will be flagged as 'has_historical_incident: true' and the incident count/severity will be added as context fields",
+    "tier_impact": "Disaster history does NOT automatically change tier assignment. It is a context field for SDMA analyst review.",
+    "disclaimer": "Disaster history integration requires officially verified data from USDMA/NDMA. Unverified or media-sourced incident records should NOT be used to modify village classifications."
+  },
+  "known_major_incidents": {
+    "note": "The following are publicly documented incidents referenced for system context only. NOT integrated into village classifications without official data.",
+    "incidents": [
+      {
+        "incident_id": "DIS-RDP-2013-001",
+        "date": "2013-06-16",
+        "hazard_type": "CLOUDBURST",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [79.0669, 30.7352]
+        },
+        "severity": "CATASTROPHIC",
+        "deaths_reported": 5700,
+        "verified_source": "OFFICIAL_GOVERNMENT",
+        "source_document": "NDMA Annual Report 2013; USDMA Post-Disaster Needs Assessment",
+        "notes": "2013 Kedarnath multi-hazard cloudburst, flood, and landslide event."
+      }
+    ]
+  }
+}

@@ -70,7 +70,35 @@ export const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Executive Screening Insight Banner */}
+      {/* 1b. Problem Context Banner -- Why Rudraprayag, Why Now */}
+      <div className="bg-gradient-to-r from-amber-950/80 to-red-950/80 border border-amber-800/50 rounded-xl p-4 shadow-sm">
+        <div className="flex items-start gap-3">
+          <div className="p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 shrink-0 mt-0.5">
+            <AlertTriangle className="w-4 h-4 text-amber-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 mb-1">
+              Why Proactive Screening Matters — Rudraprayag District Context
+            </p>
+            <p className="text-xs text-amber-100 leading-relaxed">
+              Rudraprayag District was the epicentre of India's worst modern mountain disaster —
+              the <strong className="text-amber-300">June 2013 Kedarnath floods and landslides</strong>.
+              Reactive disaster response cannot protect villages with limited road access.
+              This system demonstrates a <em>proactive</em> approach: screening 653 habitations
+              against multi-hazard terrain data <strong>before</strong> the next disaster season,
+              so SDMA/DDMA can direct field assessment resources where they are needed most.
+            </p>
+          </div>
+          <div className="shrink-0 text-right hidden sm:block">
+            <p className="text-[10px] text-amber-500 font-semibold uppercase tracking-wider">Stakeholders</p>
+            <p className="text-[10px] text-amber-300 leading-relaxed mt-0.5">
+              NDMA → SDMA<br/>DDMA → BDO<br/>Gram Panchayat
+            </p>
+          </div>
+        </div>
+      </div>
+
+
       <div className="bg-gradient-to-r from-slate-900 to-navy-900 rounded-xl border border-slate-700 p-5 shadow-md">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
           <div className="flex items-start gap-4">

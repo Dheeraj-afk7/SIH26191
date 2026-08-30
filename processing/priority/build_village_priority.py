@@ -106,7 +106,9 @@ _DISCLAIMER = (
 _METHODOLOGY_NOTE = (
     "Rule-based classification using verified proximity distance (Step 8) and "
     "multi-hazard class at centroid (Step 6 raster sample). No AHP or MCDA "
-    "weights applied. Vulnerability indicators are context fields only."
+    "weights applied. Vulnerability indicators are context fields only. "
+    "Relocation horizon labels are derived from tier classification (Phase E — PS-7). "
+    "Vulnerability flags are threshold-based context fields from Census 2011 PCA (Phase C — PS-3)."
 )
 
 
@@ -554,6 +556,175 @@ def classify_priority(
 
 
 # ---------------------------------------------------------------------------
+# Phase E — Relocation Planning Horizon Assignment (PS-7)
+# ---------------------------------------------------------------------------
+
+def assign_relocation_horizon(
+    tier: str,
+    thresholds: dict,
+) -> dict:
+    """
+    Assign a relocation planning horizon and recommended action to a village
+    based on its priority tier.
+
+    MANDATORY DISCLAIMER
+    --------------------
+    All outputs are DECISION-SUPPORT LABELS ONLY.
+    They do NOT constitute official relocation orders, evacuation notices,
+    or mandatory relocation instructions.
+    All outputs require official SDMA review before any planning action.
+
+    Parameters
+    ----------
+    tier : str — priority_tier value from classify_priority()
+    thresholds : dict — loaded priority_thresholds.yaml
+
+    Returns
+    -------
+    dict with keys:
+        relocation_horizon, relocation_horizon_display,
+        recommended_action, horizon_rationale,
+        horizon_limitations, planning_horizon_years,
+        horizon_disclaimer
+    """
+    horizons = thresholds.get("relocation_horizons", {})
+    tier_cfg = horizons.get(tier, {})
+
+    # Fallback if tier key not found in config
+    if not tier_cfg:
+        return {
+            "relocation_horizon": "UNKNOWN",
+            "relocation_horizon_display": "Unknown",
+            "recommended_action": "Horizon not configurable — priority tier not recognized.",
+            "horizon_rationale": f"Tier '{tier}' not found in relocation_horizons config.",
+            "horizon_limitations": "Configuration error — check priority_thresholds.yaml.",
+            "planning_horizon_years": "N/A",
+            "horizon_disclaimer": "DECISION SUPPORT ONLY.",
+        }
+
+    return {
+        "relocation_horizon": tier_cfg.get("horizon", "UNKNOWN"),
+        "relocation_horizon_display": tier_cfg.get("display_label", tier),
+        "recommended_action": tier_cfg.get("recommended_action", "").strip(),
+        "horizon_rationale": tier_cfg.get("horizon_rationale", "").strip(),
+        "horizon_limitations": tier_cfg.get("horizon_limitations", "").strip(),
+        "planning_horizon_years": tier_cfg.get("planning_horizon_years", "N/A"),
+        "horizon_disclaimer": tier_cfg.get("disclaimer", "DECISION SUPPORT ONLY.").strip(),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Phase C — Vulnerability Flag Computation (PS-3)
+# ---------------------------------------------------------------------------
+
+def compute_vulnerability_flags(
+    gdf: "gpd.GeoDataFrame",
+    thresholds: dict,
+) -> "gpd.GeoDataFrame":
+    """
+    Compute threshold-based vulnerability context flags from Census 2011 PCA
+    demographic indicators.
+
+    METHODOLOGY
+    -----------
+    Flags are binary (True/False) based on whether a village's indicator
+    exceeds the configured district upper-tertile threshold.
+    Flags are CONTEXT FIELDS ONLY — they do NOT alter priority tier assignment.
+    No composite score or AHP weight is computed.
+
+    DISCLAIMER
+    ----------
+    Census 2011 data. Thresholds are approximate district upper-tertile values,
+    not scientifically calibrated vulnerability weights.
+
+    Parameters
+    ----------
+    gdf : GeoDataFrame with vulnerability indicator columns
+    thresholds : loaded priority_thresholds.yaml dict
+
+    Returns
+    -------
+    GeoDataFrame with 6 additional columns:
+        vf_high_child_pop, vf_high_sc (SC-only, ST absent in Rudraprayag),
+        vf_high_dependency, vf_high_illiteracy,
+        vulnerability_flag_count, vulnerability_context
+
+    Note on SC vs ST:
+        ST proportion in Rudraprayag district is effectively zero (P75=0.000).
+        A combined SC+ST flag would be scientifically misleading.
+        vf_high_sc uses SC proportion only, benchmarked to district P75=0.246.
+    """
+    vt = thresholds.get("vulnerability_thresholds", {})
+    out = gdf.copy()
+
+    # ── Child population flag ─────────────────────────────────────────
+    child_cfg = vt.get("child_population", {})
+    child_field = child_cfg.get("field", "child_proportion")
+    child_thresh = float(child_cfg.get("threshold", 0.12))
+    if child_field in out.columns:
+        out["vf_high_child_pop"] = (
+            pd.to_numeric(out[child_field], errors="coerce").fillna(0.0) > child_thresh
+        )
+    else:
+        out["vf_high_child_pop"] = False
+
+    # -- SC proportion flag (SC ONLY -- ST omitted: ST P75=0.000 in Rudraprayag) ---
+    # ST population is effectively absent in Rudraprayag district.
+    # Combined SC+ST flag would be misleading -- use SC alone.
+    sc_cfg = vt.get("sc_population", {})
+    sc_field = sc_cfg.get("field", "sc_proportion")
+    sc_thresh = float(sc_cfg.get("threshold", 0.246))  # default = Rudraprayag P75
+    if sc_field in out.columns:
+        out["vf_high_sc"] = (
+            pd.to_numeric(out[sc_field], errors="coerce").fillna(0.0) > sc_thresh
+        )
+    else:
+        out["vf_high_sc"] = False
+
+    # -- Non-worker dependency flag ---
+    dep_cfg = vt.get("non_worker_dependency", {})
+    dep_field = dep_cfg.get("field", "non_worker_rate")
+    dep_thresh = float(dep_cfg.get("threshold", 0.579))  # default = Rudraprayag P75
+    if dep_field in out.columns:
+        out["vf_high_dependency"] = (
+            pd.to_numeric(out[dep_field], errors="coerce").fillna(0.0) > dep_thresh
+        )
+    else:
+        out["vf_high_dependency"] = False
+
+    # -- Illiteracy flag ---
+    ill_cfg = vt.get("illiteracy", {})
+    ill_field = ill_cfg.get("field", "illiteracy_rate")
+    ill_thresh = float(ill_cfg.get("threshold", 0.340))  # default = Rudraprayag P75
+    if ill_field in out.columns:
+        out["vf_high_illiteracy"] = (
+            pd.to_numeric(out[ill_field], errors="coerce").fillna(0.0) > ill_thresh
+        )
+    else:
+        out["vf_high_illiteracy"] = False
+
+    # -- Aggregate flag count (4 flags: child, SC, dependency, illiteracy) ---
+    flag_fields = ["vf_high_child_pop", "vf_high_sc",
+                   "vf_high_dependency", "vf_high_illiteracy"]
+    out["vulnerability_flag_count"] = sum(
+        out[f].astype(int) for f in flag_fields
+    )
+    out["vulnerability_context"] = out["vulnerability_flag_count"].apply(
+        lambda n: f"{n} of 4 vulnerability factors flagged"
+    )
+
+    # ── Vulnerability disclaimer field ────────────────────────────────
+    vt_out = vt.get("output", {})
+    vuln_disclaimer = vt_out.get(
+        "overall_disclaimer",
+        "Vulnerability flags are CONTEXT INFORMATION ONLY. Not used in tier assignment."
+    ).strip()
+    out["vulnerability_disclaimer"] = vuln_disclaimer
+
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Main pipeline
 # ---------------------------------------------------------------------------
 
@@ -703,16 +874,53 @@ def main() -> dict:
     reasons: List[str] = []
     rules: List[str] = []
 
+    # Phase E — relocation horizon fields
+    horizons: List[str] = []
+    horizon_displays: List[str] = []
+    recommended_actions: List[str] = []
+    horizon_rationales: List[str] = []
+    horizon_limitations: List[str] = []
+    planning_horizon_years: List[str] = []
+    horizon_disclaimers: List[str] = []
+
     for _, row in indicators_gdf.iterrows():
         tier, reason, rule = classify_priority(row, thresholds)
         tiers.append(tier)
         reasons.append(reason)
         rules.append(rule)
 
+        # Phase E — assign relocation horizon
+        h = assign_relocation_horizon(tier, thresholds)
+        horizons.append(h["relocation_horizon"])
+        horizon_displays.append(h["relocation_horizon_display"])
+        recommended_actions.append(h["recommended_action"])
+        horizon_rationales.append(h["horizon_rationale"])
+        horizon_limitations.append(h["horizon_limitations"])
+        planning_horizon_years.append(h["planning_horizon_years"])
+        horizon_disclaimers.append(h["horizon_disclaimer"])
+
     profiles_gdf = indicators_gdf.copy()
     profiles_gdf["priority_tier"] = tiers
     profiles_gdf["priority_reason"] = reasons
     profiles_gdf["priority_applied_rule"] = rules
+
+    # Phase E — attach relocation horizon fields
+    profiles_gdf["relocation_horizon"] = horizons
+    profiles_gdf["relocation_horizon_display"] = horizon_displays
+    profiles_gdf["recommended_action"] = recommended_actions
+    profiles_gdf["horizon_rationale"] = horizon_rationales
+    profiles_gdf["horizon_limitations"] = horizon_limitations
+    profiles_gdf["planning_horizon_years"] = planning_horizon_years
+    profiles_gdf["horizon_disclaimer"] = horizon_disclaimers
+
+    # Phase C — compute vulnerability flags (threshold-based, context only)
+    _section("Phase C — Vulnerability flag computation (Census PCA 2011)")
+    profiles_gdf = compute_vulnerability_flags(profiles_gdf, thresholds)
+    vf_counts = profiles_gdf["vulnerability_flag_count"].value_counts().sort_index()
+    for n_flags, n_villages in vf_counts.items():
+        print(f"  {n_flags} flags: {n_villages} villages")
+    print(f"  High vulnerability (>=2 flags): "
+          f"{(profiles_gdf['vulnerability_flag_count'] >= 2).sum()} villages")
 
     # Tier display labels
     tier_labels = {
@@ -761,9 +969,15 @@ def main() -> dict:
     prof_cols = [
         "village_id", "village_name", "tot_pop", "households",
         "pop_sc", "pop_st",
-        # Vulnerability context
+        # Vulnerability indicators (context fields, Census 2011 PCA)
         "illiteracy_rate", "child_proportion", "sc_proportion",
         "st_proportion", "non_worker_rate",
+        # Phase C -- Vulnerability flags (threshold-based, context only, NOT tier assignment)
+        # Thresholds are data-benchmarked district P75 values from Census 2011 (653 villages)
+        "vf_high_child_pop", "vf_high_sc",
+        "vf_high_dependency", "vf_high_illiteracy",
+        "vulnerability_flag_count", "vulnerability_context",
+        "vulnerability_disclaimer",
         # Hazard context
         "mh_score_at_centroid", "mh_class_at_centroid",
         "terrain_score_at_centroid", "flood_score_at_centroid",
@@ -773,6 +987,11 @@ def main() -> dict:
         # Priority classification
         "priority_tier", "priority_tier_display",
         "priority_reason", "priority_applied_rule",
+        # Phase E — Relocation Planning Horizon (PS-7)
+        "relocation_horizon", "relocation_horizon_display",
+        "recommended_action", "horizon_rationale",
+        "horizon_limitations", "planning_horizon_years",
+        "horizon_disclaimer",
         # Status
         "disaster_history_status", "disaster_history_note",
         "pca_join_status", "methodology_status",
