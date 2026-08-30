@@ -110,7 +110,11 @@ export const PipelineRecomputePage: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ steps: selectedSteps, operator_note: operatorNote || undefined }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => null);
+        const detail = errJson?.detail || `HTTP ${res.status} ${res.statusText}`;
+        throw new Error(detail);
+      }
       const data = await res.json();
       setJob(data);
 
@@ -129,14 +133,14 @@ export const PipelineRecomputePage: React.FC = () => {
           // Keep polling on transient network error
         }
       }, 2500);
-    } catch {
+    } catch (err: any) {
       setPolling(false);
       setJob({
         job_id: 'err-' + Date.now(),
         status: 'ERROR',
         steps: selectedSteps,
         estimated_seconds: 0,
-        note: 'Could not connect to backend pipeline API. Check if FastAPI server is active.',
+        note: err?.message || 'Could not connect to backend pipeline API. Check if FastAPI server is active.',
       });
     }
   };
