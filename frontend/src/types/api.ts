@@ -85,6 +85,7 @@ export interface CandidateAreaSummaryItem {
   nearest_village_name: string;
   nearest_village_pop: number;
   capacity_status: string;
+  estimated_household_capacity?: number;
 }
 
 export interface DecisionSummary {
