@@ -79,7 +79,7 @@ _DISCLAIMER = (
 
 _CAPACITY_STATUS = "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
 
-_CAPACITY_STATUS_CONFIGURED = "PRELIMINARY_CAPACITY_SCENARIO"
+_CAPACITY_STATUS_CONFIGURED = "PRELIMINARY_DWELLING_UNIT_SCENARIO"
 
 # Maximum area for site-level capacity estimation.
 # Areas > 100 ha are terrain screening zones, not individual settlement sites.
@@ -96,8 +96,8 @@ _CAPACITY_NOTE = (
 )
 
 _NOT_ALLOCATED = (
-    "NO VILLAGE-TO-AREA ALLOCATION GENERATED — No verified allocation methodology "
-    "exists for this project. Village → Candidate Area assignments must not be "
+    "PRELIMINARY DWELLING-UNIT SCENARIO — Not an official site authorization. "
+    "Village → Candidate Area assignments must not be "
     "inferred from this output."
 )
 

@@ -1,6 +1,6 @@
 # Step 9 — Candidate Topographically Feasible Area Identification Report
 
-**Generated (UTC):** 2026-08-29T21:52:51Z  
+**Generated (UTC):** 2026-08-30T07:09:30Z  
 **Project:** SIH26191 — Rudraprayag District, Uttarakhand  
 **Pipeline Version:** 1.0  
 **Status:** DECISION SUPPORT SCREENING OUTPUT — Requires Official Verification
@@ -25,9 +25,9 @@ Step 4–7 pipeline outputs were applied.
 
 | Metric | Value |
 |--------|-------|
-| Candidate area features (9B base) | **6,823** |
-| Total candidate terrain area | **57,067.1 ha** |
-| Largest single candidate area | **3,547.6 ha** |
+| Candidate area features (9B base) | **5,991** |
+| Total candidate terrain area | **16,342.3 ha** |
+| Largest single candidate area | **10.0 ha** |
 | Smallest single candidate area | **10,166 m²** |
 | Pixel area | 847.15 m² (29.11 m × 29.11 m) |
 | CRS | EPSG:32644 (WGS 84 / UTM Zone 44N) |
@@ -49,7 +49,8 @@ Step 4–7 pipeline outputs were applied.
 | `exclude_flood_class_2` | NOT_CONFIGURED | NOT_CONFIGURED |
 | `exclude_mh_class_2` | NOT_CONFIGURED | NOT_CONFIGURED |
 | `elevation_max_m` | NOT_CONFIGURED | NOT_CONFIGURED |
-| `minimum_area_m2` | APPLIED: 10000.0 m2, 24835 clusters dropped | APPLIED |
+| `minimum_area_m2` | APPLIED: 10000.0 m2 | APPLIED |
+| `maximum_area_m2` | APPLIED: 100000.0 m2 | APPLIED |
 
 ---
 

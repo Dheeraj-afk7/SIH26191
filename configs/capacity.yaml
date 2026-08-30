@@ -92,7 +92,7 @@ max_density_hh_per_ha: 80.0
 # ── Output Behaviour ──────────────────────────────────────────────────────
 output:
   # Value assigned to capacity_status when standard IS configured
-  configured_label: "PRELIMINARY_CAPACITY_SCENARIO"
+  configured_label: "PRELIMINARY_DWELLING_UNIT_SCENARIO"
   # Value assigned when standard is NOT configured
   not_estimated_label: "NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD"
   planning_standard_name: "PMAY-G 25 m²/HH (MoRD, GoI)"

@@ -529,6 +529,7 @@ def run_9b_candidate_extraction(
     id_fmt = seg.get("id_format", "CA-{:04d}")
     connectivity = seg.get("connectivity", 8)
     mmu = ca_cfg["filtering"].get("minimum_area_m2", None)
+    max_mmu = ca_cfg["filtering"].get("maximum_area_m2", None)
 
     # ------------------------------------------------------------------
     # Connected component labeling
@@ -554,25 +555,33 @@ def run_9b_candidate_extraction(
     areas_m2 = counts.astype(np.float64) * pixel_area_m2
 
     # ------------------------------------------------------------------
-    # MMU filtering [CONFIGURABLE]
+    # MMU and Scale filtering [CONFIGURABLE]
     # ------------------------------------------------------------------
-    if mmu is None:
+    keep_mask = np.ones_like(areas_m2, dtype=bool)
+    if mmu is not None:
+        mmu = float(mmu)
+        keep_mask &= (areas_m2 >= mmu)
+        param_log["minimum_area_m2"] = f"APPLIED: {mmu} m2"
+    else:
         _skip("minimum_area_m2")
         param_log["minimum_area_m2"] = "NOT_CONFIGURED"
-        retained_labels = label_vals
-        retained_areas = areas_m2
-        retained_counts = counts
-        _log(f"  Clusters retained (no MMU filter): {len(retained_labels):,}")
-    else:
-        mmu = float(mmu)
-        keep_mask = areas_m2 >= mmu
-        retained_labels = label_vals[keep_mask]
-        retained_areas = areas_m2[keep_mask]
-        retained_counts = counts[keep_mask]
-        dropped = int((~keep_mask).sum())
-        _log(f"  MMU filter: {mmu:,.0f} m2 -> dropped {dropped:,} clusters, retained {len(retained_labels):,}")
-        param_log["minimum_area_m2"] = f"APPLIED: {mmu} m2, {dropped} clusters dropped"
 
+    if max_mmu is not None:
+        max_mmu = float(max_mmu)
+        keep_mask &= (areas_m2 <= max_mmu)
+        param_log["maximum_area_m2"] = f"APPLIED: {max_mmu} m2"
+    else:
+        _skip("maximum_area_m2")
+        param_log["maximum_area_m2"] = "NOT_CONFIGURED"
+
+    retained_labels = label_vals[keep_mask]
+    retained_areas = areas_m2[keep_mask]
+    retained_counts = counts[keep_mask]
+    dropped = int((~keep_mask).sum())
+    
+    _log(f"  Scale filters applied -> dropped {dropped:,} clusters, retained {len(retained_labels):,}")
+
+    if dropped > 0:
         # Update labeled array: set dropped labels to 0
         drop_set = set(label_vals[~keep_mask].tolist())
         if drop_set:
@@ -687,6 +696,7 @@ def run_9b_candidate_extraction(
         f"exclude_mh_class_2={param_log.get('exclude_mh_class_2','NOT_CONFIGURED')}",
         f"elevation_max_m={param_log.get('elevation_max_m','NOT_CONFIGURED')}",
         f"minimum_area_m2={param_log.get('minimum_area_m2','NOT_CONFIGURED')}",
+        f"maximum_area_m2={param_log.get('maximum_area_m2','NOT_CONFIGURED')}",
     ]
     screening_basis = "; ".join(basis_parts)
     gdf["screening_basis"] = screening_basis

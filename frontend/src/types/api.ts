@@ -175,6 +175,28 @@ export interface VillageProperties {
   st_proportion?: number;
   non_worker_rate?: number;
   priority_reason?: string;
+  priority_applied_rule?: string;
+  priority_tier_display?: string;
+  relocation_horizon?: string;
+  relocation_horizon_display?: string;
+  recommended_action?: string;
+  horizon_rationale?: string;
+  horizon_limitations?: string;
+  planning_horizon_years?: string;
+  horizon_disclaimer?: string;
+  vulnerability_flag_count?: number;
+  vulnerability_context?: string;
+  vulnerability_disclaimer?: string;
+  vf_high_child_pop?: boolean;
+  vf_high_sc?: boolean;
+  vf_high_dependency?: boolean;
+  vf_high_illiteracy?: boolean;
+  disaster_history_status?: string;
+  disaster_history_note?: string;
+  nearest_disaster_incident_id?: string;
+  nearest_disaster_distance_m?: number;
+  methodology_status?: string;
+  step10c_disclaimer?: string;
 }
 
 export interface GeoJsonPoint {
@@ -249,6 +271,30 @@ export interface CandidateAreaFeature {
 export interface CandidateAreaFeatureCollection {
   type: 'FeatureCollection';
   features: CandidateAreaFeature[];
+}
+
+// --- Disaster History GeoJSON Types ---
+
+export interface DisasterIncidentProperties {
+  incident_id: string;
+  hazard_type: string;
+  date: string;
+  severity?: string;
+  verification_status: string;
+  source_metadata: string;
+  description: string;
+}
+
+export interface DisasterIncidentFeature {
+  type: 'Feature';
+  id?: string | number;
+  geometry: GeoJsonPoint;
+  properties: DisasterIncidentProperties;
+}
+
+export interface DisasterIncidentFeatureCollection {
+  type: 'FeatureCollection';
+  features: DisasterIncidentFeature[];
 }
 
 // --- Hazards Metadata Types ---

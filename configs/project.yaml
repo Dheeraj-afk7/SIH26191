@@ -425,6 +425,11 @@ candidate_areas:
     # Consistent with typical site-development minimum plot norms.
     # Phase CA-A1: Configured 2026-08-30. Re-run identify_candidate_areas.py after change.
     minimum_area_m2: 10000.0
+    # Maximum contiguous cluster area (m²) to retain as a Candidate Area.
+    # JUSTIFICATION: 10 hectares (100,000 m²) ensures candidate areas are constrained
+    # to a realistic site planning scale, preventing virtually the entire district
+    # from being selected as a single candidate area.
+    maximum_area_m2: 100000.0
 
   # ── SEGMENTATION ─────────────────────────────────────────────────────────────
   segmentation:

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layers, AlertTriangle, ArrowRight, BookOpenCheck, XCircle, Info } from 'lucide-react';
+import { Layers, AlertTriangle, ArrowRight, BookOpenCheck, XCircle, CheckCircle2, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDecisionSummary } from '../hooks';
 import { formatNumber, formatHectares, formatDistance } from '../utils/formatters';
@@ -66,7 +66,7 @@ export const CandidateAreasPage: React.FC = () => {
               <p className="text-xs text-red-800 leading-relaxed">
                 All areas are preliminary, unverified terrain-derived extents.
                 Preliminary spatial capacity scenarios are provided for areas under 100 ha only (PMAY-G 25m²/HH norm).
-                Areas over 100 ha are terrain screening zones — capacity estimates are not applicable at that scale.
+                Areas over 100 ha are terrain screening zones — dwelling-unit scenarios are not applicable at that scale.
                 Official field surveys, geotechnical assessments, and administrative clearance are mandatory prior to any planning use.
               </p>
             </div>
@@ -176,13 +176,20 @@ export const CandidateAreasPage: React.FC = () => {
                     {formatHectares(area.area_hectares)}
                   </span>
                   <div className="flex items-center gap-1">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 border border-red-300 text-red-800 text-[10px] font-bold uppercase tracking-wide">
-                      <XCircle className="w-3 h-3" />
-                      CAPACITY: NOT ESTIMATED
-                    </span>
+                    {area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-[10px] font-bold uppercase tracking-wide">
+                        <CheckCircle2 className="w-3 h-3" />
+                        SCENARIO: ~{area.estimated_household_capacity} HH
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 border border-red-300 text-red-800 text-[10px] font-bold uppercase tracking-wide">
+                        <XCircle className="w-3 h-3" />
+                        SCENARIO: NOT ESTIMATED
+                      </span>
+                    )}
                     <InfoTooltip
-                      title="Capacity Status"
-                      content="Carrying capacity (persons or households) is not calculated because official planning norms (m² per household) were unconfigured."
+                      title={area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? "Preliminary Dwelling-Unit Scenario" : "Capacity Status"}
+                      content={area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? "Estimated dwelling units under the current planning assumptions (PMAY-G 25 m² per household reference, 40% land-efficiency). This is a preliminary planning scenario, not an official settlement carrying-capacity certification. Excludes infrastructure, legal, geotechnical, and land ownership constraints." : "Carrying capacity (persons or households) is not calculated because official planning norms (m² per household) were unconfigured."}
                       side="left"
                     />
                   </div>
@@ -279,7 +286,9 @@ export const CandidateAreasPage: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div className="flex justify-between py-1.5 border-b border-slate-200">
               <span className="text-slate-500">Capacity Status</span>
-              <span className="font-mono font-bold text-red-700">NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD</span>
+              <span className={`font-mono font-bold ${areas.some(a => a.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO') ? 'text-emerald-700' : 'text-red-700'}`}>
+                {areas.some(a => a.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO') ? 'PRELIMINARY_DWELLING_UNIT_SCENARIO' : 'NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD'}
+              </span>
             </div>
             <div className="flex justify-between py-1.5 border-b border-slate-200">
               <span className="text-slate-500">Allocation Status</span>

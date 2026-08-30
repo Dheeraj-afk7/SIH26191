@@ -97,11 +97,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
   return (
     <aside
       className={`bg-navy-900 text-slate-100 flex flex-col transition-all duration-300 border-r border-navy-800 shadow-nav z-30 shrink-0 select-none ${
-        isCollapsed ? 'w-16' : 'w-64'
+        isCollapsed ? 'w-16' : 'w-72'
       }`}
     >
       {/* Brand Header */}
-      <div className="h-16 flex items-center justify-between px-3 border-b border-navy-800 bg-navy-950/40 shrink-0">
+      <div className="h-16 flex items-center justify-between px-3.5 border-b border-navy-800 bg-navy-950/50 shrink-0">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white shrink-0 shadow-sm">
             <ShieldAlert className="w-4.5 h-4.5" />
@@ -138,15 +138,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation List */}
-      <nav className="flex-1 py-3 px-2 space-y-0.5 overflow-y-auto">
+      <nav className="flex-1 py-3 px-2 space-y-1 overflow-y-auto">
         {!isCollapsed && (
-          <div className="flex items-center justify-between px-3 pb-2 pt-1">
-            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-500">
+          <div className="flex items-center justify-between px-3 pb-1.5 pt-1">
+            <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">
               Navigation Pages
             </p>
             <InfoTooltip
               title="Platform Navigation"
-              content="Use these navigation buttons to explore executive summaries, spatial maps, village registers, candidate areas, and scientific methodology."
+              content="Use these navigation buttons to explore executive summaries, spatial maps, village registers, candidate areas, authority workflows, and scientific methodology."
               side="right"
               triggerClassName="text-slate-500 hover:text-slate-300"
             />
@@ -160,11 +160,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               to={item.path}
               end={item.path === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative ${
+                `flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs transition-all duration-150 group relative ${
                   isActive
-                    ? 'bg-blue-600/20 text-white font-bold border border-blue-500/30 shadow-sm'
-                    : 'text-slate-300 hover:bg-navy-800/80 hover:text-white font-medium'
-                }`
+                    ? 'bg-blue-600/20 text-white font-semibold border-l-[3px] border-l-blue-500 border border-blue-500/20 shadow-sm'
+                    : 'text-slate-300 hover:bg-navy-800/80 hover:text-white font-medium border-l-[3px] border-l-transparent'
+                } ${isCollapsed ? 'justify-center px-2' : ''}`
               }
             >
               {({ isActive }) => (
@@ -174,11 +174,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }`} />
                   {!isCollapsed && (
                     <>
-                      <span className="truncate flex-1">{item.label}</span>
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <span className="truncate flex-1 text-left">{item.label}</span>
+                      <div className="flex items-center gap-1.5 shrink-0 ml-auto">
                         {item.badge && (
                           <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded ${
-                            isActive
+                            item.badge === '!'
+                              ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                              : isActive
                               ? 'bg-blue-500/30 text-blue-200 border border-blue-400/30'
                               : 'bg-navy-800 text-slate-400 border border-navy-700'
                           }`}>
@@ -189,24 +191,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           title={item.label}
                           content={item.description}
                           side="right"
-                          triggerClassName="text-slate-400 group-hover:text-slate-200 opacity-60 group-hover:opacity-100"
+                          triggerClassName="text-slate-400 group-hover:text-slate-200 opacity-70 group-hover:opacity-100"
                         />
                       </div>
                     </>
                   )}
 
-                  {/* Active indicator dot */}
-                  {isActive && !isCollapsed && (
-                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-glow" />
-                  )}
-
                   {/* Tooltip for collapsed view */}
                   {isCollapsed && (
-                    <div className="absolute left-full ml-3 px-2.5 py-1.5 bg-slate-900 text-white text-xs rounded-lg shadow-lg whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 border border-slate-700">
+                    <div className="absolute left-full ml-3 px-3 py-2 bg-slate-900 text-white text-xs rounded-xl shadow-2xl whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity z-50 border border-slate-700">
                       <p className="font-bold">{item.label}</p>
-                      <p className="text-[10px] text-slate-300 max-w-xs whitespace-normal">{item.description}</p>
+                      <p className="text-[10px] text-slate-300 max-w-xs whitespace-normal mt-0.5">{item.description}</p>
                       {item.badge && (
-                        <span className="mt-1 inline-block text-[10px] text-blue-300 font-mono">Count: {item.badge}</span>
+                        <span className="mt-1.5 inline-block text-[10px] text-blue-300 font-mono">Count / Tag: {item.badge}</span>
                       )}
                     </div>
                   )}

@@ -934,10 +934,34 @@ def main() -> dict:
         profiles_gdf["priority_tier"].map(tier_labels).fillna("Unknown")
     )
 
-    # Disaster history status
-    dh = thresholds.get("disaster_history", {})
-    profiles_gdf["disaster_history_status"] = dh.get("status", "NOT_ACQUIRED")
-    profiles_gdf["disaster_history_note"] = dh.get("note", "")
+    # Disaster history status (Sandbox Demo)
+    dh_demo_path = _ROOT / "data/raw/disaster_history/synthetic_demo_incidents.geojson"
+    if dh_demo_path.exists():
+        print(f"  [SANDBOX MODE] Loading synthetic demo disaster history from {dh_demo_path.name}")
+        dh_gdf = gpd.read_file(str(dh_demo_path))
+        dh_gdf = dh_gdf.to_crs(epsg=_METRIC_CRS_EPSG)
+        
+        # Spatial join to find nearest incident for each village
+        profiles_gdf = gpd.sjoin_nearest(
+            profiles_gdf,
+            dh_gdf[["incident_id", "geometry"]],
+            how="left",
+            distance_col="nearest_disaster_distance_m"
+        )
+        profiles_gdf = profiles_gdf.drop(columns=["index_right"], errors="ignore")
+        profiles_gdf = profiles_gdf.rename(columns={"incident_id": "nearest_disaster_incident_id"})
+        
+        profiles_gdf["disaster_history_status"] = "SYNTHETIC DEMO DATA"
+        profiles_gdf["disaster_history_note"] = (
+            "SANDBOX MODE: Contains synthetic disaster history for UI demonstration only. "
+            "Does NOT affect village priority tiers or relocation horizons."
+        )
+    else:
+        dh = thresholds.get("disaster_history", {})
+        profiles_gdf["disaster_history_status"] = dh.get("status", "NOT_ACQUIRED")
+        profiles_gdf["disaster_history_note"] = dh.get("note", "")
+        profiles_gdf["nearest_disaster_incident_id"] = "N/A"
+        profiles_gdf["nearest_disaster_distance_m"] = np.nan
 
     # Methodology status
     profiles_gdf["methodology_status"] = _METHODOLOGY_NOTE
@@ -994,6 +1018,7 @@ def main() -> dict:
         "horizon_disclaimer",
         # Status
         "disaster_history_status", "disaster_history_note",
+        "nearest_disaster_incident_id", "nearest_disaster_distance_m",
         "pca_join_status", "methodology_status",
         "step10c_disclaimer",
         # Identifiers
