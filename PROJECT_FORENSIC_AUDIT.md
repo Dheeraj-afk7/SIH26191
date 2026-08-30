@@ -324,40 +324,66 @@ SIH26191/
 ## 6. Algorithms, Decision Rules & Formulas
 
 ### 6.1 Terrain Slope & Aspect Derivation (Step 3)
-- **Slope Formula:**
-  $$\text{Slope}_{\text{radians}} = \arctan\left(\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2}\right)$$
-  $$\text{Slope}_{\text{degrees}} = \text{Slope}_{\text{radians}} \times \frac{180}{\pi}$$
-  Where $\partial z / \partial x$ and $\partial z / \partial y$ are finite difference elevation gradients calculated in metric space (UTM Zone 44N, metres).
-- **Aspect Formula:**
-  $$\text{Aspect}_{\text{math}} = \text{atan2}\left(-\frac{\partial z}{\partial y}, \frac{\partial z}{\partial x}\right)$$
-  $$\text{Aspect}_{\text{geo}} = (90 - \text{degrees}(\text{Aspect}_{\text{math}})) \pmod{360}$$
-  Flat pixels ($\text{gradient} \approx 0$) are assigned sentinel value `-1.0`.
+
+**Slope Formula:**
+$$
+\text{Slope}_{\text{radians}} = \arctan\left(\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2}\right)
+$$
+
+$$
+\text{Slope}_{\text{degrees}} = \text{Slope}_{\text{radians}} \times \frac{180}{\pi}
+$$
+
+Where $\partial z / \partial x$ and $\partial z / \partial y$ are finite difference elevation gradients calculated in metric space (UTM Zone 44N, metres).
+
+**Aspect Formula:**
+$$
+\text{Aspect}_{\text{math}} = \text{atan2}\left(-\frac{\partial z}{\partial y}, \frac{\partial z}{\partial x}\right)
+$$
+
+$$
+\text{Aspect}_{\text{geo}} = (90 - \text{degrees}(\text{Aspect}_{\text{math}})) \pmod{360}
+$$
+
+Flat pixels ($\text{gradient} \approx 0$) are assigned sentinel value `-1.0`.
 
 ### 6.2 Hydrology & Topographic Wetness Index (TWI) (Step 5)
 - **Flow Direction:** D8 steepest downhill descent among 8 neighbours.
 - **Topographic Wetness Index (Beven & Kirkby, 1979):**
-  $$\text{TWI} = \ln\left(\frac{a}{\tan(\beta)}\right)$$
-  Where $a = \text{FlowAccumulation} \times \text{PixelSize}_{\text{m}}$ (specific catchment area in metres), and $\beta = \max(\text{Slope}_{\text{radians}}, \text{radians}(0.1^\circ))$ (numerical safeguard).
+$$
+\text{TWI} = \ln\left(\frac{a}{\tan(\beta)}\right)
+$$
+
+Where $a = \text{FlowAccumulation} \times \text{PixelSize}_{\text{m}}$ (specific catchment area in metres), and $\beta = \max(\text{Slope}_{\text{radians}}, \text{radians}(0.1^\circ))$ (numerical safeguard).
 
 ### 6.3 Continuous Hazard Proxies & Normalization (Steps 4 & 5)
-- **Terrain Susceptibility Proxy ($T$):**
-  $$T(\theta) = \text{clip}\left(\frac{\theta - 0.0^\circ}{60.0^\circ - 0.0^\circ}, 0.0, 1.0\right)$$
-  - Class 1 (Lower): $T < 0.35$ ($\text{slope} < 21.0^\circ$)
-  - Class 2 (Moderate): $0.35 \le T < 0.65$ ($21.0^\circ \le \text{slope} < 39.0^\circ$)
-  - Class 3 (Higher): $T \ge 0.65$ ($\text{slope} \ge 39.0^\circ$)
-- **Flood Exposure Proxy ($F$):**
-  $$F(\text{TWI}) = \text{clip}\left(\frac{\text{TWI} - 3.5}{13.5 - 3.5}, 0.0, 1.0\right)$$
-  - Class 1 (Lower): $F < 0.35$ ($\text{TWI} < 7.00$)
-  - Class 2 (Moderate): $0.35 \le F < 0.65$ ($7.00 \le \text{TWI} < 10.00$)
-  - Class 3 (Higher): $F \ge 0.65$ ($\text{TWI} \ge 10.00$)
+
+**Terrain Susceptibility Proxy ($T$):**
+$$
+T(\theta) = \text{clip}\left(\frac{\theta - 0.0^\circ}{60.0^\circ - 0.0^\circ}, 0.0, 1.0\right)
+$$
+- Class 1 (Lower): $T < 0.35$ ($\text{slope} < 21.0^\circ$)
+- Class 2 (Moderate): $0.35 \le T < 0.65$ ($21.0^\circ \le \text{slope} < 39.0^\circ$)
+- Class 3 (Higher): $T \ge 0.65$ ($\text{slope} \ge 39.0^\circ$)
+
+**Flood Exposure Proxy ($F$):**
+$$
+F(\text{TWI}) = \text{clip}\left(\frac{\text{TWI} - 3.5}{13.5 - 3.5}, 0.0, 1.0\right)
+$$
+- Class 1 (Lower): $F < 0.35$ ($\text{TWI} < 7.00$)
+- Class 2 (Moderate): $0.35 \le F < 0.65$ ($7.00 \le \text{TWI} < 10.00$)
+- Class 3 (Higher): $F \ge 0.65$ ($\text{TWI} \ge 10.00$)
 
 ### 6.4 Multi-Hazard Integration (Step 6)
-- **Multi-Hazard Screening Score ($M$):**
-  $$M(x,y) = (0.5 \times T(x,y)) + (0.5 \times F(x,y))$$
-  - Contribution Layers: $C_{\text{terrain}} = 0.5 \times T$, $C_{\text{flood}} = 0.5 \times F$
-  - Class 1 (Lower): $M < 0.35$
-  - Class 2 (Moderate): $0.35 \le M < 0.65$
-  - Class 3 (Higher): $M \ge 0.65$
+
+**Multi-Hazard Screening Score ($M$):**
+$$
+M(x,y) = (0.5 \times T(x,y)) + (0.5 \times F(x,y))
+$$
+- Contribution Layers: $C_{\text{terrain}} = 0.5 \times T$, $C_{\text{flood}} = 0.5 \times F$
+- Class 1 (Lower): $M < 0.35$
+- Class 2 (Moderate): $0.35 \le M < 0.65$
+- Class 3 (Higher): $M \ge 0.65$
 
 ### 6.5 Candidate Red Zone Extraction (Step 7)
 - **Source:** Pixels where $\text{Multi-Hazard Class} = 3$.
@@ -412,10 +438,19 @@ Flags are computed from Census 2011 PCA data benchmarked at Rudraprayag district
 - **Scale Protection Rule:**
   - If $\text{Area} > 100.0\text{ ha} \implies \text{Status} = \text{`AREA_EXCEEDS_SITE_PLANNING_SCALE`}$ (Capacity is not estimated).
   *(Protects against absurd macro-scale claims on massive regional terrain clusters).*
-- **Dwelling Capacity Formulas (for $\text{Area} \le 100\text{ ha}$):**
-  $$\text{Usable Area } (\text{m}^2) = \text{Area } (\text{m}^2) \times 0.40$$
-  $$\text{Estimated Households} = \left\lfloor \frac{\text{Usable Area } (\text{m}^2)}{25.0\text{ m}^2/\text{HH}} \right\rfloor$$
-  $$\text{Estimated Population} = \text{Estimated Households} \times 4.0\text{ persons/HH}$$
+
+**Dwelling Capacity Formulas (for $\text{Area} \le 100\text{ ha}$):**
+$$
+\text{Usable Area } (\text{m}^2) = \text{Area } (\text{m}^2) \times 0.40
+$$
+
+$$
+\text{Estimated Households} = \left\lfloor \frac{\text{Usable Area } (\text{m}^2)}{25.0\text{ m}^2/\text{HH}} \right\rfloor
+$$
+
+$$
+\text{Estimated Population} = \text{Estimated Households} \times 4.0\text{ persons/HH}
+$$
 
 ---
 
