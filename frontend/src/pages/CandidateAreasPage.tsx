@@ -1,9 +1,8 @@
 import React from 'react';
-import { Layers, AlertTriangle, ArrowRight, BookOpenCheck, XCircle, CheckCircle2, Info } from 'lucide-react';
+import { Layers, ArrowRight, BookOpenCheck, XCircle, CheckCircle2, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useDecisionSummary } from '../hooks';
 import { formatNumber, formatHectares, formatDistance } from '../utils/formatters';
-import { MANDATORY_DISCLAIMERS } from '../config/constants';
 import { InfoTooltip } from '../components/shared/InfoTooltip';
 
 export const CandidateAreasPage: React.FC = () => {
@@ -79,37 +78,38 @@ export const CandidateAreasPage: React.FC = () => {
         </div>
       </div>
 
-      {/* CA-0001 Special Alert */}
-      <div className="bg-amber-50 border-2 border-amber-400 rounded-xl p-4 shadow-sm">
+      {/* Active Screening Rules & Thresholds Summary */}
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+          <Layers className="w-5 h-5 text-blue-700 shrink-0 mt-0.5" />
           <div className="flex-1">
             <div className="flex items-center justify-between flex-wrap gap-2 mb-2">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-bold text-amber-950">
-                  Context regarding CA-0001 — 361,307 Hectares
+                <p className="text-sm font-bold text-slate-900">
+                  Active Terrain Screening & Threshold Parameters
                 </p>
                 <InfoTooltip
-                  title="CA-0001 Broad Extent"
-                  content="CA-0001 covers a huge contiguous portion of the district because minimum mapping unit and strict upper slope thresholds were left unconfigured in this baseline run."
+                  title="Screening Parameters Context"
+                  content="Multi-criterion deterministic screening filters applied to isolate candidate topographically feasible terrain polygons from Copernicus 30m DEM and hazard red zones."
                   side="bottom"
                 />
               </div>
-              <span className="px-2.5 py-1 rounded-md bg-amber-200 border border-amber-400 text-amber-900 text-[10px] font-bold uppercase tracking-wide">
-                Very Large Unfiltered Terrain Extent
+              <span className="px-2.5 py-1 rounded-md bg-blue-100 border border-blue-300 text-blue-900 text-[10px] font-bold uppercase tracking-wide">
+                Configured & Enforced
               </span>
             </div>
-            <p className="text-xs text-amber-900 leading-relaxed mb-3">
-              {MANDATORY_DISCLAIMERS.CA_0001_WARNING}
+            <p className="text-xs text-slate-600 leading-relaxed mb-3">
+              Discrete terrain polygons (1.0–10.0 ha) screened below slope upper limits (≤ 20.0°), outside multi-hazard red zones, and excluding ESA WorldCover tree cover and water bodies. Dwelling-unit scenarios estimated using PMAY-G 25 m²/HH planning standard at 40% site efficiency.
             </p>
             <div className="flex flex-wrap gap-2">
               {[
-                { label: 'Slope Max Deg: NOT_CONFIGURED', tip: 'Maximum permissible slope angle was not capped at a strict upper limit.' },
-                { label: 'Minimum Mapping Unit: NOT_CONFIGURED', tip: 'Polygon partitioning into discrete parcels was not applied.' },
-                { label: 'Capacity Standard: NOT_CONFIGURED', tip: 'Hectares per person or household standard was unconfigured.' },
+                { label: 'Slope Threshold: ≤ 20.0° Enforced', tip: 'Terrain slope angle capped at 20.0 degrees maximum.' },
+                { label: 'Minimum Mapping Unit: 1.0 – 10.0 ha', tip: 'Polygon partitioning into discrete parcels applied (10,000–100,000 m²).' },
+                { label: 'Ecological Exclusion: ESA WorldCover Applied', tip: 'Tree cover, water bodies, and protected wildlife boundaries excluded.' },
+                { label: 'Capacity Standard: PMAY-G 25 m²/HH (40% Eff.)', tip: 'PMAY-G 25 m² per household norm with 40% usable site efficiency factor.' },
               ].map((item) => (
                 <div key={item.label} className="inline-flex items-center gap-1">
-                  <span className="px-2 py-0.5 rounded bg-amber-100 border border-amber-300 text-amber-800 text-[11px] font-mono font-medium">
+                  <span className="px-2 py-0.5 rounded bg-white border border-slate-300 text-slate-800 text-[11px] font-mono font-medium">
                     {item.label}
                   </span>
                   <InfoTooltip title={item.label.split(':')[0]} content={item.tip} side="top" />
@@ -137,31 +137,31 @@ export const CandidateAreasPage: React.FC = () => {
         </div>
 
         {areas.map((area) => {
-          const isCA0001 = area.area_id === 'CA-0001';
+          const isVeryLarge = (area.area_hectares || 0) > 100;
 
           return (
             <div
               key={area.area_id}
               className={`bg-white rounded-xl border shadow-sm overflow-hidden ${
-                isCA0001
+                isVeryLarge
                   ? 'border-amber-400 ring-1 ring-amber-300'
                   : 'border-slate-200'
               }`}
             >
               {/* Area Header Bar */}
               <div className={`px-5 py-3 border-b flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 ${
-                isCA0001 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
+                isVeryLarge ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div className="flex items-center gap-3 flex-wrap">
                   <span className="font-mono text-base font-bold text-slate-900 px-2.5 py-1 rounded-md bg-white border border-slate-300 shadow-xs">
                     {area.area_id}
                   </span>
                   <span className="text-xs font-semibold text-slate-700">
-                    {isCA0001 ? 'Preliminary Unfiltered Terrain Extent' : 'Candidate Feasible Terrain Cluster'}
+                    {isVeryLarge ? 'Large Scale Terrain Screening Zone' : 'Candidate Feasible Terrain Cluster'}
                   </span>
-                  {isCA0001 && (
+                  {isVeryLarge && (
                     <span className="px-2 py-0.5 rounded bg-amber-200 border border-amber-400 text-amber-900 text-[10px] font-bold uppercase tracking-wide">
-                      Unfiltered
+                      Terrain Extent ({formatHectares(area.area_hectares)})
                     </span>
                   )}
                   <InfoTooltip
@@ -176,10 +176,15 @@ export const CandidateAreasPage: React.FC = () => {
                     {formatHectares(area.area_hectares)}
                   </span>
                   <div className="flex items-center gap-1">
-                    {area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? (
+                    {area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' && area.estimated_household_capacity != null ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-300 text-emerald-800 text-[10px] font-bold uppercase tracking-wide">
                         <CheckCircle2 className="w-3 h-3" />
-                        SCENARIO: ~{area.estimated_household_capacity} HH
+                        SCENARIO: ~{formatNumber(area.estimated_household_capacity)} HH
+                      </span>
+                    ) : area.capacity_status === 'AREA_EXCEEDS_SITE_PLANNING_SCALE' ? (
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-50 border border-amber-300 text-amber-800 text-[10px] font-bold uppercase tracking-wide">
+                        <Info className="w-3 h-3" />
+                        SCENARIO: EXCEEDS SITE SCALE
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-50 border border-red-300 text-red-800 text-[10px] font-bold uppercase tracking-wide">
@@ -189,7 +194,7 @@ export const CandidateAreasPage: React.FC = () => {
                     )}
                     <InfoTooltip
                       title={area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? "Preliminary Dwelling-Unit Scenario" : "Capacity Status"}
-                      content={area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? "Estimated dwelling units under the current planning assumptions (PMAY-G 25 m² per household reference, 40% land-efficiency). This is a preliminary planning scenario, not an official settlement carrying-capacity certification. Excludes infrastructure, legal, geotechnical, and land ownership constraints." : "Carrying capacity (persons or households) is not calculated because official planning norms (m² per household) were unconfigured."}
+                      content={area.capacity_status === 'PRELIMINARY_DWELLING_UNIT_SCENARIO' ? `Estimated dwelling units under PMAY-G 25 m²/HH planning standard at 40% land efficiency (~${formatNumber(area.estimated_household_capacity || 0)} HH, ~${formatNumber(area.estimated_population_capacity || 0)} persons). Preliminary planning scenario, not official carrying capacity certification.` : "Carrying capacity is not calculated for terrain screening extents over 100 ha or unconfigured planning standards."}
                       side="left"
                     />
                   </div>
@@ -244,12 +249,12 @@ export const CandidateAreasPage: React.FC = () => {
 
                 {/* Area Scale Context Banner */}
                 <div className={`flex items-start justify-between gap-2 p-3 rounded-lg border text-xs leading-relaxed ${
-                  isCA0001
+                  isVeryLarge
                     ? 'bg-amber-50 border-amber-200 text-amber-900'
                     : 'bg-slate-50 border-slate-200 text-slate-600'
                 }`}>
                   <div className="flex items-start gap-2">
-                    <Info className={`w-4 h-4 mt-0.5 shrink-0 ${isCA0001 ? 'text-amber-600' : 'text-slate-400'}`} />
+                    <Info className={`w-4 h-4 mt-0.5 shrink-0 ${isVeryLarge ? 'text-amber-600' : 'text-slate-400'}`} />
                     <p className="font-mono text-[11px]">{area.area_scale_context}</p>
                   </div>
                   <InfoTooltip

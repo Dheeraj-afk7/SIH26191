@@ -1,6 +1,6 @@
 # Step 10 — Decision Engine, Priority & Standardized Outputs
 
-**Generated (UTC):** 2026-08-30T14:17:25Z  
+**Generated (UTC):** 2026-08-30T14:31:43Z  
 **Project:** SIH26191 — Rudraprayag District, Uttarakhand  
 **Pipeline Version:** 1.0  
 **Status:** DECISION SUPPORT SCREENING OUTPUT — Requires Official Verification
@@ -3109,10 +3109,8 @@ The following indicators are derived from Census PCA 2011.
 | CA-2998 | 1.0 ha | 14.4° | 13703 m | Moltha | PRELIMINARY_DWELLING_UNIT_SCENARIO |
 
 
-> **IMPORTANT:** CA-0001 covers ~361,307 ha (virtually all non-excluded terrain in the district).
-> This is because configurable screening filters (slope threshold, minimum mapping unit) are
-> NOT_CONFIGURED in `configs/project.yaml`. These areas are UNFILTERED TERRAIN SCREENS,
-> not discrete relocation site recommendations.
+> **IMPORTANT:** Candidate areas are preliminary terrain-derived screening polygons (slope ≤ 20.0°, minimum mapping unit 1.0–10.0 ha, ESA WorldCover ecological exclusions applied).
+> Preliminary spatial capacity scenarios are calculated based on PMAY-G 25 m²/HH guidelines at 40% site efficiency for discrete parcels under 100 ha.
 >
 > **No Village → Candidate Area allocation has been generated.**
 > No verified allocation methodology exists for this project.
@@ -3121,11 +3119,10 @@ The following indicators are derived from Census PCA 2011.
 
 ## 8. Capacity Status
 
-**Status:** `NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD`
+**Status:** `PRELIMINARY_DWELLING_UNIT_SCENARIO`
 
-No area-per-household or area-per-person planning standard has been provided.
-Configure `configs/capacity.yaml` with a verified authority citation before
-computing capacity estimates.
+Planning standard applied: PMAY-G 25 m² per household (MoRD, GoI) at 40% site-efficiency factor for areas under 100 ha.
+Official geotechnical assessments, engineering surveys, and administrative clearances are required before actual site planning.
 
 ---
 

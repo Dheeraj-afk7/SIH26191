@@ -131,3 +131,31 @@ def test_pipeline_steps_endpoint(client):
     assert response.status_code == 200
     data = response.json()
     assert "available_steps" in data
+
+def test_decision_summary_candidate_areas(client):
+    response = client.get("/api/decision/summary")
+    assert response.status_code == 200
+    data = response.json()
+    assert "candidate_areas" in data
+    ca = data["candidate_areas"]
+    assert "areas" in ca
+    assert len(ca["areas"]) > 0
+    first_area = ca["areas"][0]
+    assert "area_id" in first_area
+    assert "area_hectares" in first_area
+    assert "estimated_household_capacity" in first_area
+    assert first_area["estimated_household_capacity"] is not None
+
+def test_pipeline_recompute_and_status(client):
+    response = client.post("/api/pipeline/recompute", json={"steps": ["priority"]})
+    assert response.status_code == 200
+    data = response.json()
+    assert "job_id" in data
+    assert data["status"] in ["QUEUED", "RUNNING"]
+    
+    # Poll status endpoint
+    poll_resp = client.get(f"/api/pipeline/status/{data['job_id']}")
+    assert poll_resp.status_code == 200
+    poll_data = poll_resp.json()
+    assert poll_data["job_id"] == data["job_id"]
+

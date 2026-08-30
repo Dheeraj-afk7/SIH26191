@@ -19,8 +19,7 @@ import {
 import { PriorityBadge } from '../components/shared/PriorityBadge';
 import { InfoTooltip } from '../components/shared/InfoTooltip';
 import { formatNumber, formatDistance } from '../utils/formatters';
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../config/api';
 
 const DISCLAIMER =
   'DECISION SUPPORT ONLY — NOT AN OFFICIAL RELOCATION ORDER, EVACUATION NOTICE, OR GOVERNMENT DECLARATION. ' +
@@ -29,7 +28,7 @@ const DISCLAIMER =
 
 function fetchActionQueue(highVulnOnly: boolean, tiers: string) {
   return fetch(
-    `${API_BASE}/api/authority/action-queue?tiers=${encodeURIComponent(tiers)}&high_vuln_only=${highVulnOnly}&limit=200`
+    `${API_BASE_URL}/api/authority/action-queue?tiers=${encodeURIComponent(tiers)}&high_vuln_only=${highVulnOnly}&limit=200`
   ).then(r => {
     if (!r.ok) throw new Error(`HTTP error ${r.status}`);
     return r.json();
@@ -37,7 +36,7 @@ function fetchActionQueue(highVulnOnly: boolean, tiers: string) {
 }
 
 function fetchBlockSummary() {
-  return fetch(`${API_BASE}/api/authority/block-summary`).then(r => {
+  return fetch(`${API_BASE_URL}/api/authority/block-summary`).then(r => {
     if (!r.ok) throw new Error(`HTTP error ${r.status}`);
     return r.json();
   });
@@ -45,7 +44,7 @@ function fetchBlockSummary() {
 
 function downloadCSV(tiers: string) {
   window.open(
-    `${API_BASE}/api/authority/report.csv?tiers=${encodeURIComponent(tiers)}`,
+    `${API_BASE_URL}/api/authority/report.csv?tiers=${encodeURIComponent(tiers)}`,
     '_blank'
   );
 }

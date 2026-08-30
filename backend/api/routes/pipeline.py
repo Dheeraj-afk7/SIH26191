@@ -10,6 +10,7 @@ LABEL: Operator-Triggered Recompute Workflow
 Dynamically refreshes active in-memory datasets on completion.
 """
 
+import sys
 import uuid
 import subprocess
 import threading
@@ -81,7 +82,7 @@ def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
 
         try:
             proc = subprocess.run(
-                ["python", script],
+                [sys.executable, script],
                 cwd=str(_ROOT),
                 capture_output=True,
                 text=True,
@@ -130,7 +131,11 @@ def _run_job(job_id: str, steps: List[str], operator_note: Optional[str]):
     job["completed_at"] = datetime.datetime.now(datetime.timezone.utc).isoformat()
     job["step_results"] = results
     job["data_store_reload"] = reload_status
-    job["note"] = "Pipeline recomputation complete and in-memory datasets dynamically refreshed."
+    if all_ok:
+        job["note"] = "Pipeline recomputation complete and in-memory datasets dynamically refreshed."
+    else:
+        failed_steps = [r["step"] for r in results if r.get("status") != "COMPLETE"]
+        job["note"] = f"Pipeline recomputation encountered issues in step(s): {', '.join(failed_steps)}."
     if operator_note:
         job["operator_note"] = operator_note
 

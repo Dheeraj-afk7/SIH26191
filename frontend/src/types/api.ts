@@ -86,6 +86,13 @@ export interface CandidateAreaSummaryItem {
   nearest_village_pop: number;
   capacity_status: string;
   estimated_household_capacity?: number;
+  estimated_population_capacity?: number;
+  usable_area_ha?: number;
+  usable_area_m2?: number;
+  capacity_planning_standard?: string;
+  dominant_land_cover?: string;
+  road_accessibility_category?: string;
+  road_accessibility_status?: string;
 }
 
 export interface DecisionSummary {

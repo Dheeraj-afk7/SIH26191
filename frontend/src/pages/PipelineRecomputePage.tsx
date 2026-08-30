@@ -16,8 +16,7 @@ import {
   Terminal
 } from 'lucide-react';
 import { InfoTooltip } from '../components/shared/InfoTooltip';
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+import { API_BASE_URL } from '../config/api';
 
 type JobStatus = 'idle' | 'QUEUED' | 'RUNNING' | 'COMPLETE' | 'PARTIAL_FAILURE' | 'ERROR';
 
@@ -105,7 +104,7 @@ export const PipelineRecomputePage: React.FC = () => {
 
     try {
       setPolling(true);
-      const res = await fetch(`${API_BASE}/api/pipeline/recompute`, {
+      const res = await fetch(`${API_BASE_URL}/api/pipeline/recompute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ steps: selectedSteps, operator_note: operatorNote || undefined }),
@@ -118,10 +117,10 @@ export const PipelineRecomputePage: React.FC = () => {
       const data = await res.json();
       setJob(data);
 
-      // Poll every 2.5 seconds until done
+      // Poll every 2 seconds until done
       const interval = setInterval(async () => {
         try {
-          const pollRes = await fetch(`${API_BASE}/api/pipeline/status/${data.job_id}`);
+          const pollRes = await fetch(`${API_BASE_URL}/api/pipeline/status/${data.job_id}`);
           if (!pollRes.ok) return;
           const pollData = await pollRes.json();
           setJob(pollData);
@@ -132,7 +131,7 @@ export const PipelineRecomputePage: React.FC = () => {
         } catch {
           // Keep polling on transient network error
         }
-      }, 2500);
+      }, 2000);
     } catch (err: any) {
       setPolling(false);
       setJob({
@@ -140,7 +139,7 @@ export const PipelineRecomputePage: React.FC = () => {
         status: 'ERROR',
         steps: selectedSteps,
         estimated_seconds: 0,
-        note: err?.message || 'Could not connect to backend pipeline API. Check if FastAPI server is active.',
+        note: err?.message || `Could not connect to backend pipeline API at ${API_BASE_URL}. Ensure FastAPI server is active.`,
       });
     }
   };
@@ -408,6 +407,29 @@ export const PipelineRecomputePage: React.FC = () => {
                           View Authority Action Center
                           <ArrowRight className="w-3 h-3" />
                         </Link>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Error & Failure Notice */}
+                  {(job.status === 'ERROR' || job.status === 'PARTIAL_FAILURE') && (
+                    <div className="p-3.5 rounded-xl bg-red-50/90 border border-red-200 space-y-2.5 text-xs text-red-900">
+                      <div className="flex items-center gap-1.5 font-bold text-red-800">
+                        <AlertCircle className="w-4 h-4 text-red-600" />
+                        <span>Execution Notice</span>
+                      </div>
+                      <p className="text-[11px] leading-relaxed text-red-800">
+                        {job.note || 'Pipeline recomputation encountered an error.'}
+                      </p>
+                      <div className="pt-1">
+                        <button
+                          onClick={triggerRecompute}
+                          disabled={polling}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-700 hover:bg-red-800 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+                        >
+                          <RefreshCw className="w-3.5 h-3.5" />
+                          Retry Recomputation
+                        </button>
                       </div>
                     </div>
                   )}

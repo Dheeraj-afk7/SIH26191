@@ -339,7 +339,7 @@ export const GisMap: React.FC = () => {
                     <span class="text-[10px] text-slate-500 font-mono">${formatHectares(props.area_hectares)}</span>
                   </div>
                   <p class="text-slate-700 text-[11px] font-medium leading-tight">
-                    ${props.area_id === 'CA-0001' ? 'Preliminary Unfiltered Terrain Extent' : 'Candidate Feasible Terrain Cluster'}
+                    ${(props.area_hectares || 0) > 100 ? 'Large Terrain Screening Zone' : 'Candidate Feasible Terrain Cluster'}
                   </p>
                   <div class="text-[10px] text-slate-600 divide-y divide-slate-100">
                     <div class="py-0.5 flex justify-between"><span>Mean Slope:</span> <strong>${props.mean_slope ? props.mean_slope.toFixed(1) : '—'}°</strong></div>

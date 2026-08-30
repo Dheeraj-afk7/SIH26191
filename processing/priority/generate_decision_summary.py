@@ -218,6 +218,14 @@ def compute_area_summary(areas: gpd.GeoDataFrame) -> dict:
             "nearest_village_name": str(row.get("nearest_village_name", "N/A")),
             "nearest_village_pop": _nan_safe(row.get("nearest_village_pop")),
             "capacity_status": str(row.get("capacity_status", "NOT_ESTIMATED")),
+            "estimated_household_capacity": _nan_safe(row.get("estimated_household_capacity")),
+            "estimated_population_capacity": _nan_safe(row.get("estimated_population_capacity")),
+            "usable_area_ha": _nan_safe(row.get("usable_area_ha")),
+            "usable_area_m2": _nan_safe(row.get("usable_area_m2")),
+            "capacity_planning_standard": str(row.get("capacity_planning_standard", "NOT_CONFIGURED")),
+            "dominant_land_cover": str(row.get("dominant_land_cover", "N/A")),
+            "road_accessibility_category": str(row.get("road_accessibility_category", "N/A")),
+            "road_accessibility_status": str(row.get("road_accessibility_status", "N/A")),
         }
         s["areas"].append(area_rec)
 
@@ -377,10 +385,8 @@ The following indicators are derived from Census PCA 2011.
 |---------|------|------------|-----------------|----------------|-----------------|
 {area_rows if area_rows else "| — | Data not available | — | — | — | — |"}
 
-> **IMPORTANT:** CA-0001 covers ~361,307 ha (virtually all non-excluded terrain in the district).
-> This is because configurable screening filters (slope threshold, minimum mapping unit) are
-> NOT_CONFIGURED in `configs/project.yaml`. These areas are UNFILTERED TERRAIN SCREENS,
-> not discrete relocation site recommendations.
+> **IMPORTANT:** Candidate areas are preliminary terrain-derived screening polygons (slope ≤ 20.0°, minimum mapping unit 1.0–10.0 ha, ESA WorldCover ecological exclusions applied).
+> Preliminary spatial capacity scenarios are calculated based on PMAY-G 25 m²/HH guidelines at 40% site efficiency for discrete parcels under 100 ha.
 >
 > **No Village → Candidate Area allocation has been generated.**
 > No verified allocation methodology exists for this project.
@@ -389,11 +395,10 @@ The following indicators are derived from Census PCA 2011.
 
 ## 8. Capacity Status
 
-**Status:** `NOT_ESTIMATED_REQUIRES_PLANNING_STANDARD`
+**Status:** `{areas_summary.get('capacity_status', 'PRELIMINARY_DWELLING_UNIT_SCENARIO')}`
 
-No area-per-household or area-per-person planning standard has been provided.
-Configure `configs/capacity.yaml` with a verified authority citation before
-computing capacity estimates.
+Planning standard applied: PMAY-G 25 m² per household (MoRD, GoI) at 40% site-efficiency factor for areas under 100 ha.
+Official geotechnical assessments, engineering surveys, and administrative clearances are required before actual site planning.
 
 ---
 
