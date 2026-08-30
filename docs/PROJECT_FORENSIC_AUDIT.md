@@ -325,19 +325,19 @@ SIH26191/
 
 ### 6.1 Terrain Slope & Aspect Derivation (Step 3)
 - **Slope Formula:**
-  $$\text{slope\_radians} = \arctan\left(\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2}\right)$$
-  $$\text{slope\_degrees} = \text{slope\_radians} \times \frac{180}{\pi}$$
+  $$\text{Slope}_{\text{radians}} = \arctan\left(\sqrt{\left(\frac{\partial z}{\partial x}\right)^2 + \left(\frac{\partial z}{\partial y}\right)^2}\right)$$
+  $$\text{Slope}_{\text{degrees}} = \text{Slope}_{\text{radians}} \times \frac{180}{\pi}$$
   Where $\partial z / \partial x$ and $\partial z / \partial y$ are finite difference elevation gradients calculated in metric space (UTM Zone 44N, metres).
 - **Aspect Formula:**
-  $$\text{aspect\_math} = \text{atan2}\left(-\frac{\partial z}{\partial y}, \frac{\partial z}{\partial x}\right)$$
-  $$\text{aspect\_geo} = (90 - \text{degrees}(\text{aspect\_math})) \pmod{360}$$
+  $$\text{Aspect}_{\text{math}} = \text{atan2}\left(-\frac{\partial z}{\partial y}, \frac{\partial z}{\partial x}\right)$$
+  $$\text{Aspect}_{\text{geo}} = (90 - \text{degrees}(\text{Aspect}_{\text{math}})) \pmod{360}$$
   Flat pixels ($\text{gradient} \approx 0$) are assigned sentinel value `-1.0`.
 
 ### 6.2 Hydrology & Topographic Wetness Index (TWI) (Step 5)
 - **Flow Direction:** D8 steepest downhill descent among 8 neighbours.
 - **Topographic Wetness Index (Beven & Kirkby, 1979):**
   $$\text{TWI} = \ln\left(\frac{a}{\tan(\beta)}\right)$$
-  Where $a = \text{flow\_accumulation} \times \text{pixel\_size\_m}$ (specific catchment area in metres), and $\beta = \max(\text{slope\_radians}, \text{radians}(0.1^\circ))$ (numerical safeguard).
+  Where $a = \text{FlowAccumulation} \times \text{PixelSize}_{\text{m}}$ (specific catchment area in metres), and $\beta = \max(\text{Slope}_{\text{radians}}, \text{radians}(0.1^\circ))$ (numerical safeguard).
 
 ### 6.3 Continuous Hazard Proxies & Normalization (Steps 4 & 5)
 - **Terrain Susceptibility Proxy ($T$):**
@@ -360,7 +360,7 @@ SIH26191/
   - Class 3 (Higher): $M \ge 0.65$
 
 ### 6.5 Candidate Red Zone Extraction (Step 7)
-- **Source:** Pixels where $\text{MH\_Class} == 3$.
+- **Source:** Pixels where $\text{Multi-Hazard Class} = 3$.
 - **Segmentation:** Morphological connected components with 8-neighbour connectivity.
 - **MMU Threshold:** Area $\ge 5,000\text{ m}^2$ (~0.5 ha, ~6 pixels). Micro-clusters $< 5,000\text{ m}^2$ discarded.
 - **Output:** 289 Candidate Red Zone Polygons (`RZ-001` to `RZ-289`).
@@ -391,10 +391,10 @@ else:
 
 ### 6.7 Demographic Vulnerability Context Flags (Phase C / PS-3)
 Flags are computed from Census 2011 PCA data benchmarked at Rudraprayag district upper tertile (75th percentile, P75) across 653 habitations. **These flags act as context only and DO NOT alter the physical hazard tier assignment:**
-1. `vf_high_child_pop`: Child proportion ($P\_06 / \text{TOT\_P}$) $> 0.151$ (15.1%).
-2. `vf_high_sc`: Scheduled Caste proportion ($\text{TOT\_SC} / \text{TOT\_P}$) $> 0.246$ (24.6%). (ST flag omitted because ST P75 = 0.000 in Rudraprayag).
-3. `vf_high_dependency`: Non-worker rate ($(\text{TOT\_P} - \text{WORK\_P}) / \text{TOT\_P}$) $> 0.579$ (57.9%).
-4. `vf_high_illiteracy`: Illiteracy rate ($P\_ILL / \text{TOT\_P}$) $> 0.340$ (34.0%).
+1. `vf_high_child_pop`: Child proportion (`P_06 / TOT_P`) $> 0.151$ (15.1%).
+2. `vf_high_sc`: Scheduled Caste proportion (`TOT_SC / TOT_P`) $> 0.246$ (24.6%). (ST flag omitted because ST P75 = 0.000 in Rudraprayag).
+3. `vf_high_dependency`: Non-worker rate (`(TOT_P - WORK_P) / TOT_P`) $> 0.579$ (57.9%).
+4. `vf_high_illiteracy`: Illiteracy rate (`P_ILL / TOT_P`) $> 0.340$ (34.0%).
 - Composite count: `vulnerability_flag_count` ($0$ to $4$). High vulnerability defined as $\ge 2$ flags active.
 
 ### 6.8 Relocation Planning Horizon Mapping (Phase E / PS-7)
@@ -410,12 +410,12 @@ Flags are computed from Census 2011 PCA data benchmarked at Rudraprayag district
 - **Norm:** Minimum $25\text{ m}^2$ built floor area per household.
 - **Site Efficiency Factor ($\eta$):** $0.40$ (40% of gross polygon area assumed directly buildable; 60% reserved for roads, setbacks, drainage, and open spaces).
 - **Scale Protection Rule:**
-  $$\text{If } \text{Area}_{\text{ha}} > 100.0\text{ ha} \implies \text{Status} = \text{"AREA\_EXCEEDS\_SITE\_PLANNING\_SCALE" (Capacity = null)}$$
+  - If $\text{Area} > 100.0\text{ ha} \implies \text{Status} = \text{`AREA_EXCEEDS_SITE_PLANNING_SCALE`}$ (Capacity is not estimated).
   *(Protects against absurd macro-scale claims on massive regional terrain clusters).*
-- **Dwelling Capacity Formulas (for $\text{Area}_{\text{ha}} \le 100\text{ ha}$):**
-  $$\text{Usable\_Area}_{\text{m}^2} = \text{Area}_{\text{m}^2} \times 0.40$$
-  $$\text{Estimated\_Households} = \left\lfloor \frac{\text{Usable\_Area}_{\text{m}^2}}{25.0\text{ m}^2/\text{HH}} \right\rfloor$$
-  $$\text{Estimated\_Population} = \text{Estimated\_Households} \times 4.0\text{ persons/HH}$$
+- **Dwelling Capacity Formulas (for $\text{Area} \le 100\text{ ha}$):**
+  $$\text{Usable Area } (\text{m}^2) = \text{Area } (\text{m}^2) \times 0.40$$
+  $$\text{Estimated Households} = \left\lfloor \frac{\text{Usable Area } (\text{m}^2)}{25.0\text{ m}^2/\text{HH}} \right\rfloor$$
+  $$\text{Estimated Population} = \text{Estimated Households} \times 4.0\text{ persons/HH}$$
 
 ---
 
