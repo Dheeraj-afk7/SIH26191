@@ -354,7 +354,7 @@ $$
 \text{TWI} = \ln\left(\frac{a}{\tan(\beta)}\right)
 $$
 
-Where $a = \text{FlowAccumulation} \times \text{PixelSize}_{\text{m}}$ (specific catchment area in metres), and $\beta = \max(\text{Slope}_{\text{radians}}, \text{radians}(0.1^\circ))$ (numerical safeguard).
+Where $a = \text{FlowAccumulation} \times \text{PixelSize}_m$ (specific catchment area in metres), and $\beta = \max(\text{Slope}_{\text{radians}}, 0.1^\circ \times \frac{\pi}{180})$ (numerical safeguard).
 
 ### 6.3 Continuous Hazard Proxies & Normalization (Steps 4 & 5)
 
