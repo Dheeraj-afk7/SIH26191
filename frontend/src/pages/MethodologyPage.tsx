@@ -149,10 +149,10 @@ export const MethodologyPage: React.FC = () => {
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 relative group">
             <div className="flex items-center justify-between">
               <span className="font-mono text-[10px] text-blue-600 font-bold block mb-1">STEPS 8–9</span>
-              <InfoTooltip title="Exposure & Terrain" content="Spatial join of 653 Census habitations and screening of 6,823 candidate terrain feasibility clusters (slope ≤ 20°)." side="top" />
+              <InfoTooltip title="Exposure & Terrain" content="Spatial join of 653 Census habitations and deterministic screening of 2,998 candidate terrain feasibility clusters (slope ≤ 20°, MMU 1.0–10.0 ha, ESA WorldCover ecological exclusions)." side="top" />
             </div>
             <p className="font-semibold text-slate-900">Exposure & Terrain</p>
-            <p className="text-[11px] text-slate-500 mt-1">653 Habitations join + 6,823 candidate screened terrain areas</p>
+            <p className="text-[11px] text-slate-500 mt-1">653 Habitations join + 2,998 candidate screened terrain polygons</p>
           </div>
 
           <div className="p-3 bg-blue-50 rounded-lg border border-blue-200 relative group">

@@ -33,6 +33,10 @@ interface Job {
     label: string;
     status: string;
     elapsed_seconds?: number;
+    returncode?: number;
+    error?: string;
+    stdout_tail?: string;
+    stderr_tail?: string;
   }>;
   note?: string;
   disclaimer?: string;
@@ -368,21 +372,28 @@ export const PipelineRecomputePage: React.FC = () => {
                         {job.step_results.map((step, idx) => (
                           <div
                             key={idx}
-                            className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs"
+                            className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs space-y-1.5"
                           >
-                            <div className="flex items-center gap-2">
-                              {step.status === 'COMPLETE' ? (
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                              ) : (
-                                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                              )}
-                              <span className="font-semibold text-slate-800">
-                                {step.label || step.step}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                {step.status === 'COMPLETE' ? (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                                ) : (
+                                  <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                )}
+                                <span className="font-semibold text-slate-800">
+                                  {step.label || step.step}
+                                </span>
+                              </div>
+                              <span className="font-mono text-[11px] font-bold text-slate-500">
+                                {step.elapsed_seconds != null ? `${step.elapsed_seconds}s` : step.status}
                               </span>
                             </div>
-                            <span className="font-mono text-[11px] font-bold text-slate-500">
-                              {step.elapsed_seconds != null ? `${step.elapsed_seconds}s` : step.status}
-                            </span>
+                            {step.status !== 'COMPLETE' && (step.error || step.stderr_tail) && (
+                              <div className="p-2 bg-red-50 border border-red-200 rounded text-[10px] font-mono text-red-800 break-all leading-tight">
+                                {step.error || step.stderr_tail}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

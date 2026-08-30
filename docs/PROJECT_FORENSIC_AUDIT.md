@@ -158,9 +158,9 @@ SIH26191/
 | `frontend/src/pages/MapPage.tsx` | Page Route `/map` | YES | Full interactive Leaflet GIS map with 289 red zones, 653 habitations, candidate areas |
 | `frontend/src/pages/VillageExplorerPage.tsx` | Page Route `/villages` | YES | 653-village directory with real-time search, tier filters, pagination, metric table |
 | `frontend/src/pages/VillageDetailPage.tsx` | Page Route `/villages/:id` | YES | Single village drill-down: Why This Classification card, PS-7 Relocation Horizon, PS-3 Vulnerability flags |
-| `frontend/src/pages/CandidateAreasPage.tsx` | Page Route `/candidate-areas` | YES | Relocation terrain candidate cards, CA-0001 warning, PMAY-G dwelling scenarios |
+| `frontend/src/pages/CandidateAreasPage.tsx` | Page Route `/candidate-areas` | YES | Relocation terrain candidate cards (2,998 discrete clusters, slope <= 20°, MMU 1-10 ha, ESA WorldCover exclusions), Active Screening Parameters banner, PMAY-G dwelling scenarios |
 | `frontend/src/pages/AuthorityActionPage.tsx` | Page Route `/authority` | YES | SDMA/DDMA Action Queue sorted by hazard distance, Sub-district block aggregation, CSV export |
-| `frontend/src/pages/PipelineRecomputePage.tsx` | Page Route `/pipeline` | YES | Dynamic recomputation trigger UI, polling status monitor, execution timeline logs |
+| `frontend/src/pages/PipelineRecomputePage.tsx` | Page Route `/pipeline` | YES | Operator-triggered dynamic recomputation workflow (4 modular steps: Village Priority, Capacity Enrichment, Infrastructure Routing, Decision Summary), background execution monitor, live telemetry, and per-step diagnostic error reporting |
 | `frontend/src/pages/MethodologyPage.tsx` | Page Route `/methodology` | YES | Scientific audit, data provenance matrix, 6 architectural enhancements, 8 limitations |
 | `frontend/src/pages/SystemStatusPage.tsx` | Page Route `/status` | YES | Backend health probe, dataset cache integrity table, API route catalog |
 | `frontend/src/components/map/GisMap.tsx` | Map Component | YES | Leaflet/React-Leaflet canvas renderer, tile layer, GeoJSON overlays, popups |
@@ -296,7 +296,7 @@ SIH26191/
   │           ├── data/processed/decision/village_priority_profiles.gpkg
   │           └── data/processed/decision/village_priority_indicators.gpkg
   ├── processing/capacity/build_candidate_context.py (Step 10D)
-  │     ├── PMAY-G 25 m²/HH capacity scenarios with 100 ha scale protection (PS-6)
+  │     ├── PMAY-G 25 m²/HH capacity calculation with 100 ha scale protection (PS-6)
   │     └── Output: data/processed/decision/candidate_area_context.gpkg
   └── processing/priority/generate_decision_summary.py (Step 10E)
         └── Outputs:
@@ -462,9 +462,9 @@ $$
 | `/map` | `MapPage.tsx` | GIS Analysts & Field Surveyors | Full-Screen Leaflet Viewport, MapLegend, Spatial Disclaimer Box | Layer toggles (Red Zones, Habitations, Candidate Areas), Point click popups, Zoom/Pan controls | `GET /api/red-zones`, `GET /api/villages`, `GET /api/candidate-areas` |
 | `/villages` | `VillageExplorerPage.tsx` | SDMA Planning Officers | Filter/Search Bar, Tier Filter Pills (All, Tier 1, Tier 2, Tier 3, Beyond), Paginated 25-row Table with Priority Badges & Distances | Name/ID search input, Tier filter buttons, pagination buttons, row click to detail view | `GET /api/villages?limit=25&offset=...&priority_tier=...` |
 | `/villages/:id` | `VillageDetailPage.tsx` | DDMA Field Assessment Teams | Village Header Card (Population, Households), "Why This Classification?" Explainability Card, PS-7 Planning Horizon Banner, Spatial Context Box, PS-3 Demographic Vulnerability Context Box | Back navigation button, Link to Map view, Link to Methodology, Tooltips | `GET /api/villages/{id}` |
-| `/candidate-areas` | `CandidateAreasPage.tsx` | Resettlement & Land Planners | Mandatory Safety & Terminology Notice, CA-0001 Broad Extent Warning, Candidate Area Cards with PMAY-G Dwelling Capacity Scenarios | Links to Methodology, Tooltips, Area scale badges | `GET /api/decision/summary`, `GET /api/candidate-areas` |
+| `/candidate-areas` | `CandidateAreasPage.tsx` | Resettlement & Land Planners | Active Terrain Screening & Threshold Parameters Banner (Slope <= 20°, MMU 1-10 ha, ESA WorldCover, PMAY-G standard), 2,998 Candidate Area Cards with PMAY-G Dwelling Capacity Scenarios | Links to Methodology, Tooltips, Area scale badges | `GET /api/decision/summary`, `GET /api/candidate-areas` |
 | `/authority` | `AuthorityActionPage.tsx` | SDMA / DDMA / District Magistrates | Action Center Header with Print Button & CSV Export, Summary Stats (Tier counts, At-risk population), Tabs ("Action Queue" / "Sub-District Blocks"), High-Vuln Filter Toggle | Tier 2 toggle checkbox, High Vulnerability checkbox, Search bar, Print button (`window.print()`), CSV download trigger | `GET /api/authority/action-queue`, `GET /api/authority/block-summary`, `GET /api/authority/report.csv` |
-| `/pipeline` | `PipelineRecomputePage.tsx` | System Operators & GIS Administrators | Step Selector Cards (Village Priority, Capacity Enrichment), Operator Note textarea, Run Button, Polling Status Monitor & Execution Timeline | Step toggle selection, Operator note input, Trigger Recompute button, Live timer & timeline | `POST /api/pipeline/recompute`, `GET /api/pipeline/status/{id}`, `GET /api/pipeline/steps` |
+| `/pipeline` | `PipelineRecomputePage.tsx` | System Operators & GIS Administrators | 4-Step Modular Selector Cards (Village Priority, Capacity Enrichment, Infrastructure Routing, Decision Summary), Operator Note textarea, Run Button, Polling Status Monitor, Live Telemetry & Step Diagnostic Error Previews | Step toggle selection, Operator note input, Trigger Recompute button, Live timer & timeline, Retry Recomputation | `POST /api/pipeline/recompute`, `GET /api/pipeline/status/{id}`, `GET /api/pipeline/steps` |
 | `/methodology` | `MethodologyPage.tsx` | Scientific Evaluators & Auditors | Compliance & Enhancements Grid (Phases A–F), Data Provenance Matrix (8 datasets), 8-item Methodological Limitations Register | Tooltips, Status Badges | Static configuration & `GET /api/metadata` |
 | `/status` | `SystemStatusPage.tsx` | DevOps & Technical Auditors | Backend API Health Card, In-Memory Dataset Cache Integrity Table (5 datasets), REST API Endpoints Catalog (11 routes) | Health Refresh Button, Tooltips | `GET /api/health`, `GET /api/metadata` |
 
