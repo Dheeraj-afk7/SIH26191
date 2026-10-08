@@ -92,3 +92,20 @@ Thumbs.db
 configs/secrets.yaml
 configs/*.key
 *.pem
+
+# ─── Internal / Dev-Only Files (not for reviewers) ──────────────────────────
+# AI-generated knowledge base — internal use only
+SIH-KNOWLEDGE-BASE/
+
+# Scratch / debug scripts
+scripts/scratch_*.py
+
+# Raw step-log development notes inside docs/
+docs/step8_*.md
+docs/step9_*.md
+docs/step10_*.md
+docs/step11_*.md
+docs/post_step*.md
+
+# Root-level duplicates (canonical copy lives in docs/)
+PROJECT_FORENSIC_AUDIT.md
